@@ -6,7 +6,9 @@ public class Database {
 	
 	public Database() {
 		try {
+			// zetten van drivers
 			Class.forName("com.mysql.jdbc.Driver");
+			// verbinding opzetten
 			connection = DriverManager.getConnection("jdbc:mysql://localhost/unwdmi?serverTimezone=CET", "root", "root");
 		} catch (Exception e){
 			System.out.println(e);
@@ -14,6 +16,11 @@ public class Database {
 	}
 	
 	public void executeQuery(String query) {
+		// TODO
+	}
+	
+	public void executeTestQuery(String query) {
+		// Schrijft alle data uit stations tabel naar console
 		try (Statement stmt = connection.createStatement();
 			    ResultSet rs = stmt.executeQuery( "SELECT * FROM stations" )
 			) {

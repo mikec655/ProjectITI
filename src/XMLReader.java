@@ -1,13 +1,7 @@
 
-public class XMLReader implements Runnable {
+public class XMLReader {
 	
 	public XMLReader() {
-		
-	}
-	
-	@Override
-	public void run() {
-		// TODO Auto-generated method stub
 		
 	}
 	
