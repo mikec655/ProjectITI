@@ -9,7 +9,7 @@ public class Database {
 			// zetten van drivers
 			Class.forName("com.mysql.jdbc.Driver");
 			// verbinding opzetten
-			connection = DriverManager.getConnection("jdbc:mysql://localhost/unwdmi?serverTimezone=CET", "root", "root");
+			connection = DriverManager.getConnection("jdbc:mysql://145.37.168.43/unwdmi?serverTimezone=CET", "gerben", "361273gerben");
 		} catch (Exception e){
 			System.out.println(e);
 		}
