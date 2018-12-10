@@ -1,25 +1,26 @@
 import java.sql.*;
 
-public class Database {
+public abstract class Database {
 	
-	private Connection connection;
+	private static Connection connection;
 	
-	public Database() {
+	public static void connect() {
 		try {
 			// zetten van drivers
 			Class.forName("com.mysql.jdbc.Driver");
 			// verbinding opzetten
-			connection = DriverManager.getConnection("jdbc:mysql://62.131.183.80:5000/unwdmi?serverTimezone=CET", "kakidioot", "ProjectITI3306");
+			// connection = DriverManager.getConnection("jdbc:mysql://62.131.183.80:5000/unwdmi?serverTimezone=CET", "kakidioot", "ProjectITI3306");
+			connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1/unwdmi?serverTimezone=CET", "gerben", "361273gerben");
 		} catch (Exception e){
 			System.out.println(e);
 		}
 	}
 	
-	public void executeQuery(String query) {
+	public static void executeQuery(String query) {
 		// TODO
 	}
 	
-	public void executeTestQuery(String query) {
+	public static void executeTestQuery(String query) {
 		// Schrijft alle data uit stations tabel naar console
 		try (Statement stmt = connection.createStatement();
 			    ResultSet rs = stmt.executeQuery( "SELECT * FROM stations" )

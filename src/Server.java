@@ -22,7 +22,7 @@ public class Server
             while (true){
 	            Socket socket = server.accept(); 
 	            threadCounter++;
-	            Thread client = new Thread(new Client(socket, threadCounter));
+	            Thread client = new Thread(new Client(socket));
 				client.start();
 				System.out.println("New client accepted, client count: " + threadCounter);
             }
@@ -36,8 +36,8 @@ public class Server
     public static void main(String args[]) 
     { 
         // verbinding met database
-    	Database db = new Database();
-        db.executeTestQuery("");
+    	Database.connect();
+        Database.executeTestQuery("");
         
         // start van de server
     	Server server = new Server(11000); 
