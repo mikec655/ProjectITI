@@ -6,11 +6,9 @@ public abstract class Database {
 	
 	public static void connect() {
 		try {
-			// zetten van drivers
-			Class.forName("com.mysql.jdbc.Driver");
 			// verbinding opzetten
-			// connection = DriverManager.getConnection("jdbc:mysql://62.131.183.80:5000/unwdmi?serverTimezone=CET", "kakidioot", "ProjectITI3306");
-			connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1/unwdmi?serverTimezone=CET", "gerben", "361273gerben");
+			connection = DriverManager.getConnection("jdbc:mysql://62.131.183.80:5000/unwdmi?serverTimezone=CET", "kakidioot", "ProjectITI3306");
+			//connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1/unwdmi?serverTimezone=CET", "gerben", "361273gerben");
 		} catch (Exception e){
 			System.out.println(e);
 		}
