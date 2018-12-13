@@ -36,10 +36,10 @@ public class Server
     public static void main(String args[]) 
     { 
         // verbinding met database
-    	Database.connect();
-        Database.executeTestQuery("");
+    	// Database.connect();
+        // Database.executeTestQuery("");
         
         // start van de server
-    	Server server = new Server(11000); 
+    	new Server(11000); 
     } 
 } 
