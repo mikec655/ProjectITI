@@ -4,10 +4,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
+
 public class Client implements Runnable{
 	
 	private Socket socket;
 	private BufferedReader input;
+	Station[] Station_array = new Station[10];
+
 	
 	public Client(Socket socket) {
 		this.socket = socket;
@@ -49,6 +52,8 @@ public class Client implements Runnable{
         int charIndex = 58;
 		char c = '\n';
 		for (int i = 0; i < 10; i++) {
+			if (Station_array[i]== null) {
+				Station_array[i]= new Station(i);}
 			String str = "";
 			String stn = "";
 			String date = "";
@@ -93,6 +98,28 @@ public class Client implements Runnable{
 			//System.out.println(str);
 			if (!str.isEmpty()) {
 				temp = Float.parseFloat(str);
+				
+				if(Station_array[i].Q.size() > 0) {
+					if(temp > 1.2*Station_array[i].Extrapolate(temp) | temp<0.8*Station_array[i].Extrapolate(temp)){
+						//hier iets doen met temperatuur? leeglaten/gemiddelde gebruiken??
+					}
+					
+					//deze is beter denk ik.
+					if(temp > Station_array[i].Avarage*1.2 | temp < Station_array[i].Avarage() * 0.8) {
+						//hier iets doen met temperatuur? leeglaten/gemiddelde gebruiken??
+					}
+				}
+				//System.out.println("station:" + i+1 +" temp: "+ temp + " gem:" +Station_array[i].Extrapolate(temp)+ "zonder temp:"+ Station_array[i].Avarage());
+				
+				
+				if(Station_array[i].Q.size()<= 29){
+					Station_array[i].Q.add(temp);
+				}
+				else{
+					Station_array[i].Temp_queue_aanpassen(temp);
+				}
+				
+			
 			}
 			
 			charIndex += 16;
@@ -215,7 +242,7 @@ public class Client implements Runnable{
 		// meten van verstreken tijd 
 		stopTime = System.nanoTime();
 		long speed = stopTime - startTime;
-		//System.out.println("Writing XML file took " + speed + "ns");
+		System.out.println("Writing XML file took " + speed + "ns");
 		
 	}
 	
