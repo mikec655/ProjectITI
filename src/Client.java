@@ -58,7 +58,7 @@ public class Client implements Runnable{
 			String stn = "";
 			String date = "";
 			String time = "";
-			float temp = 0.0f;
+			double temp = 0.0f;
 			float dewp = 0.0f;
 			float stp = 0.0f;
 			float slp = 0.0f;
@@ -97,28 +97,34 @@ public class Client implements Runnable{
 			}
 			//System.out.println(str);
 			if (!str.isEmpty()) {
-				temp = Float.parseFloat(str);
+				temp = Double.parseDouble(str);
+				if(i == 0) {
+					System.out.println(temp);
+				}
+				if(Station_array[i].Q.size()== 0) {
+					Station_array[i].Q.add(temp);
+				}
 				
-				if(Station_array[i].Q.size() > 0) {
-					if(temp > 1.2*Station_array[i].Extrapolate(temp) | temp<0.8*Station_array[i].Extrapolate(temp)){
-						//hier iets doen met temperatuur? leeglaten/gemiddelde gebruiken??
-					}
-					
-					//deze is beter denk ik.
-					if(temp > Station_array[i].Avarage*1.2 | temp < Station_array[i].Avarage() * 0.8) {
-						//hier iets doen met temperatuur? leeglaten/gemiddelde gebruiken??
+				if(Station_array[i].Q.size() > 1) {	
+					if(temp > (Station_array[i].Extrapolate()*1.2) | temp < (Station_array[i].Extrapolate() * 0.8)) {
+						temp = Station_array[i].Extrapolate();
+						
+							System.out.println( i +":buiten waarden");
+						
 					}
 				}
 				//System.out.println("station:" + i+1 +" temp: "+ temp + " gem:" +Station_array[i].Extrapolate(temp)+ "zonder temp:"+ Station_array[i].Avarage());
 				
 				
-				if(Station_array[i].Q.size()<= 29){
+				if(Station_array[i].Q.size() < 30 && Station_array[i].Q.size()>1 ){
 					Station_array[i].Q.add(temp);
 				}
 				else{
 					Station_array[i].Temp_queue_aanpassen(temp);
 				}
-				
+					//if(Station_array[i].Q.size()== 30) {
+					//Station_array[i].Extrapolate();
+					//}
 			
 			}
 			
@@ -242,7 +248,7 @@ public class Client implements Runnable{
 		// meten van verstreken tijd 
 		stopTime = System.nanoTime();
 		long speed = stopTime - startTime;
-		System.out.println("Writing XML file took " + speed + "ns");
+		//System.out.println("Writing XML file took " + speed + "ns");
 		
 	}
 	
