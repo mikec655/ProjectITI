@@ -9,7 +9,7 @@ public class Client implements Runnable{
 	
 	private Socket socket;
 	private BufferedReader input;
-	Station[] Station_array = new Station[10];
+	Station[] stations = new Station[10];
 
 	
 	public Client(Socket socket) {
@@ -52,8 +52,7 @@ public class Client implements Runnable{
         int charIndex = 58;
 		char c = '\n';
 		for (int i = 0; i < 10; i++) {
-			if (Station_array[i]== null) {
-				Station_array[i]= new Station(i);}
+			if (stations[i]== null) stations[i]= new Station();
 			String str = "";
 			String stn = "";
 			String date = "";
@@ -96,37 +95,17 @@ public class Client implements Runnable{
 				charIndex++;
 			}
 			//System.out.println(str);
+			double extrapolatedTemp = stations[i].extrapolateTemp();
 			if (!str.isEmpty()) {
 				temp = Double.parseDouble(str);
-				if(i == 0) {
-					System.out.println(temp);
+				if (temp > extrapolatedTemp * 1.2 && temp < extrapolatedTemp * 0.8) {
+					temp = extrapolatedTemp;
 				}
-				if(Station_array[i].Q.size()== 0) {
-					Station_array[i].Q.add(temp);
-				}
-				
-				if(Station_array[i].Q.size() > 1) {	
-					if(temp > (Station_array[i].Extrapolate()*1.2) | temp < (Station_array[i].Extrapolate() * 0.8)) {
-						temp = Station_array[i].Extrapolate();
-						
-							System.out.println( i +":buiten waarden");
-						
-					}
-				}
-				//System.out.println("station:" + i+1 +" temp: "+ temp + " gem:" +Station_array[i].Extrapolate(temp)+ "zonder temp:"+ Station_array[i].Avarage());
-				
-				
-				if(Station_array[i].Q.size() < 30 && Station_array[i].Q.size()>1 ){
-					Station_array[i].Q.add(temp);
-				}
-				else{
-					Station_array[i].Temp_queue_aanpassen(temp);
-				}
-					//if(Station_array[i].Q.size()== 30) {
-					//Station_array[i].Extrapolate();
-					//}
 			
+			} else {
+				temp = extrapolatedTemp;
 			}
+			stations[i].addTemp(temp);
 			
 			charIndex += 16;
 			str = "";
