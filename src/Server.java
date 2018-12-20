@@ -29,13 +29,13 @@ public abstract class Server
 				}
 		}
 		, 0, 1, TimeUnit.SECONDS);
-//    	exec.scheduleAtFixedRate(new Runnable() {
-//			@Override
-//			public void run() {
-//				Database.executeQuery();
-//			}
-//		}
-//		, 0, 1, TimeUnit.MILLISECONDS);
+    	executor.scheduleAtFixedRate(new Runnable() {
+			@Override
+			public void run() {
+				Database.executeQuery();
+			}
+		}
+		, 0, 1, TimeUnit.MILLISECONDS);
 
     	
         Socket connection; // Client socket

@@ -10,7 +10,7 @@ public abstract class Database {
 		try {
 			// verbinding opzetten
 			// connection = DriverManager.getConnection("jdbc:mysql://62.131.183.80:5000/unwdmi?serverTimezone=CET", "kakidioot", "ProjectITI3306");
-			connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1/unwdmi?serverTimezone=CET", "gerben", "361273gerben");
+			connection = DriverManager.getConnection("jdbc:mysql://145.37.168.204/unwdmi?serverTimezone=CET", "gerben", "361273gerben");
 		} catch (Exception e){
 			System.out.println(e);
 		}
@@ -21,27 +21,27 @@ public abstract class Database {
 	}
 	
 	public static void executeQuery() {
-//		if (inserts.size() == 0) return;
-//		long startTime = System.nanoTime();
-//		String query = "INSERT INTO measurement (stn, date, time, temp, dewp, stp, slp, visib, wdsp, prcp, sndp, frshtt, cldc, wnddir) VALUES ";
-//		int end = inserts.size();
-//		for (int i = 0; i < end; i++) {
-//			if (i == end - 1) {
-//				query += inserts.poll() + ";";
-//			} else {
-//				query += inserts.poll() + ", ";
-//			}
-//		}
-//		Statement stmt;
-//		try {
-//			stmt = connection.createStatement();
-//			long stopTime = System.nanoTime();
-//			long time = stopTime - startTime;
-//			System.out.println("Database inserted " + stmt.executeUpdate(query) + " rows in " + time + "ns");
-//			
-//		} catch (SQLException e) {
-//			e.printStackTrace();
-//		}
+		if (inserts.size() == 0) return;
+		long startTime = System.nanoTime();
+		String query = "INSERT INTO measurement (stn, date, time, temp, dewp, stp, slp, visib, wdsp, prcp, sndp, frshtt, cldc, wnddir) VALUES ";
+		int end = inserts.size();
+		for (int i = 0; i < end; i++) {
+			if (i == end - 1) {
+				query += inserts.poll() + ";";
+			} else {
+				query += inserts.poll() + ", ";
+			}
+		}
+		Statement stmt;
+		try {
+			stmt = connection.createStatement();
+			long stopTime = System.nanoTime();
+			long time = stopTime - startTime;
+			System.out.println("Database inserted " + stmt.executeUpdate(query) + " rows in " + time + "ns");
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public static void executeTestQuery(String query) {

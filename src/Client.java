@@ -24,9 +24,6 @@ public class Client implements Runnable{
 	
 	@Override
 	public void run() {
-		long startTime;
-		long stopTime;
-		
 		String xml = "";
     	
     	// leest totdat einde van xml-bestand bereikt is
@@ -57,16 +54,16 @@ public class Client implements Runnable{
 			String stn = "";
 			String date = "";
 			String time = "";
-			double temp = 0.0;
-			double dewp = 0.0f;
-			double stp = 0.0f;
-			double slp = 0.0f;
-			double visib = 0.0f;
-			double wdsp = 0.0f;
-			double prcp = 0.0f;
-			double sndp = 0.0f;
+			float temp = 0.0f;
+			float dewp = 0.0f;
+			float stp = 0.0f;
+			float slp = 0.0f;
+			float visib = 0.0f;
+			float wdsp = 0.0f;
+			float prcp = 0.0f;
+			float sndp = 0.0f;
 			String frshtt = "";
-			double cldc = 0.0f;
+			float cldc = 0.0f;
 			int wnddir = 0;
 			
 			while ((c = xml.charAt(charIndex)) != '<') {
@@ -92,14 +89,14 @@ public class Client implements Runnable{
 				charIndex++;
 			}
 			charIndex += charIndexSteps[j++];
-			temp = Double.parseDouble(str);
+			temp = Float.parseFloat(str);
 			if (stations[i].sizeOfTemp() > 0) {
-				double extrapolatedTemp = stations[i].extrapolateTemp();
+				float extrapolatedTemp = stations[i].extrapolateTemp();
 				if (Math.abs(temp) > Math.abs(extrapolatedTemp) * 1.2) {
-					temp = extrapolatedTemp * 1.2;
+					temp = extrapolatedTemp * 1.2f;
 					//System.out.println("Wrong value -> " + temp);
 				} else if (Math.abs(temp) < Math.abs(extrapolatedTemp) * 0.8) {
-					temp = extrapolatedTemp * 0.8;
+					temp = extrapolatedTemp * 0.8f;
 					//System.out.println("Wrong value -> " + temp);
 				}
 			}
@@ -112,7 +109,7 @@ public class Client implements Runnable{
 			}
 			charIndex += charIndexSteps[j++];
 			if (str.isEmpty()) dewp = stations[i].extrapolateDewp(); 
-			else dewp = Double.parseDouble(str);
+			else dewp = Float.parseFloat(str);
 			stations[i].addDewp(dewp);
 			
 			str = "";
@@ -122,7 +119,7 @@ public class Client implements Runnable{
 			}
 			charIndex += charIndexSteps[j++];
 			if (str.isEmpty()) stp = stations[i].extrapolateStp(); 
-			else stp = Double.parseDouble(str);
+			else stp = Float.parseFloat(str);
 			stations[i].addStp(stp);
 			
 			str = "";
@@ -132,7 +129,7 @@ public class Client implements Runnable{
 			}
 			charIndex += charIndexSteps[j++];
 			if (str.isEmpty()) slp = stations[i].extrapolateSlp(); 
-			else slp = Double.parseDouble(str);
+			else slp = Float.parseFloat(str);
 			stations[i].addSlp(slp);
 			
 			str = "";
@@ -142,7 +139,7 @@ public class Client implements Runnable{
 			}
 			charIndex += charIndexSteps[j++];
 			if (str.isEmpty()) visib = stations[i].extrapolateSlp(); 
-			else visib = Double.parseDouble(str);
+			else visib = Float.parseFloat(str);
 			stations[i].setVisib(visib);
 			
 			str = "";
@@ -152,7 +149,7 @@ public class Client implements Runnable{
 			}
 			charIndex += charIndexSteps[j++];
 			if (str.isEmpty()) wdsp = stations[i].extrapolateWdsp();
-			else wdsp = Double.parseDouble(str);
+			else wdsp = Float.parseFloat(str);
 			stations[i].addWdsp(wdsp);
 			
 			str = "";
@@ -162,7 +159,7 @@ public class Client implements Runnable{
 			}
 			charIndex += charIndexSteps[j++];
 			if (str.isEmpty()) prcp = stations[i].getPrcp();
-			else prcp = Double.parseDouble(str);
+			else prcp = Float.parseFloat(str);
 			stations[i].setPrcp(prcp);
 			
 			str = "";
@@ -172,7 +169,7 @@ public class Client implements Runnable{
 			}
 			charIndex += charIndexSteps[j++];
 			if (str.isEmpty()) sndp = stations[i].getSndp();
-			else sndp = Double.parseDouble(str);
+			else sndp = Float.parseFloat(str);
 			stations[i].setSndp(sndp);
 			
 			while ((c = xml.charAt(charIndex)) != '<') {
@@ -190,7 +187,7 @@ public class Client implements Runnable{
 			}
 			charIndex += charIndexSteps[j++];
 			if (str.isEmpty()) cldc = stations[i].getCldc();
-			else cldc = Double.parseDouble(str);
+			else cldc = Float.parseFloat(str);
 			stations[i].setCldc(cldc);
 			
 			str = "";
@@ -211,7 +208,7 @@ public class Client implements Runnable{
 			}
 		}
     	
-		//Database.addInsert(inserts);
+		Database.addInsert(inserts);
 	
 		//stopTime = System.nanoTime();
 		//long speed = stopTime - startTime;

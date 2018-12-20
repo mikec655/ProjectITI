@@ -3,55 +3,55 @@ import java.util.Deque;
 
 
 public class Station {
-	private Deque<Double> tempQueue = new ArrayDeque<Double>();
-	private Deque<Double> dewpQueue = new ArrayDeque<Double>();
-	private Deque<Double> stpQueue = new ArrayDeque<Double>();
-	private Deque<Double> slpQueue = new ArrayDeque<Double>();
-	private double visib;
-	private Deque<Double> wdspQueue = new ArrayDeque<Double>();
-	private double prcp;
-	private double sndp;
+	private Deque<Float> tempQueue = new ArrayDeque<Float>();
+	private Deque<Float> dewpQueue = new ArrayDeque<Float>();
+	private Deque<Float> stpQueue = new ArrayDeque<Float>();
+	private Deque<Float> slpQueue = new ArrayDeque<Float>();
+	private float visib;
+	private Deque<Float> wdspQueue = new ArrayDeque<Float>();
+	private float prcp;
+	private float sndp;
 	private String frshtt;
-	private double cldc;
+	private float cldc;
 	private int wnddir;
 	
 	// Setters and Adders
-	private void addValue(double value, Deque<Double> queue) {
+	private void addValue(float value, Deque<Float> queue) {
 		queue.add(value);
 		if (queue.size() > 30) {
 			queue.poll();
 		}
 	}
 	
-	public void addTemp(double temp) {
+	public void addTemp(float temp) {
 		addValue(temp, tempQueue);
 	}
 	
-	public void addDewp(double dewp) {
+	public void addDewp(float dewp) {
 		addValue(dewp, dewpQueue);
 	}
 	
-	public void addStp(double stp) {
+	public void addStp(float stp) {
 		addValue(stp, stpQueue);
 	}
 	
-	public void addSlp(double slp) {
+	public void addSlp(float slp) {
 		addValue(slp, slpQueue);
 	}
 	
-	public void setVisib(double visib) {
+	public void setVisib(float visib) {
 		this.visib = visib;
 	}
 	
-	public void addWdsp(double wdsp) {
+	public void addWdsp(float wdsp) {
 		addValue(wdsp, wdspQueue);
 	}
 	
-	public void setPrcp(double prcp) {
+	public void setPrcp(float prcp) {
 		this.prcp = prcp;
 	}
 
-	public void setSndp(double sndp) {
+	public void setSndp(float sndp) {
 		this.sndp = sndp;
 	}
 
@@ -59,7 +59,7 @@ public class Station {
 		this.frshtt = frshtt;
 	}
 
-	public void setCldc(double cldc) {
+	public void setCldc(float cldc) {
 		this.cldc = cldc;
 	}
 
@@ -68,59 +68,58 @@ public class Station {
 	}
 
 	// Getters and Extrapolations
-	private double extrapolate(Deque<Double> queue) {
-		float f = 0;
-		double somy = 0;
-		double somxy = 0;
-		double x = 1;
-		double somx = 0;
-		double somx2 = 0;
+	private float extrapolate(Deque<Float> queue) {
+		float somy = 0;
+		float somxy = 0;
+		float x = 1;
+		float somx = 0;
+		float somx2 = 0;
 		int n = queue.size();
-		for(double y: queue) {
-			double product = x * y;
+		for(float y: queue) {
+			float product = x * y;
 			somxy += product;
 			somy += y;
 			somx += x;
 			somx2 += Math.pow(x, 2);
 			x++;
 		}
-		double gemx = somx / n;
-		double gemy = somy / n;
-		double rc = ((n * somxy) - (somx * somy)) / ((n * somx2) - (Math.pow(somx, 2)));
-		double constant = gemy - rc*gemx;
-		double newValue = constant + rc*(n+1); 
+		float gemx = somx / n;
+		float gemy = somy / n;
+		float rc = (float) (((n * somxy) - (somx * somy)) / ((n * somx2) - (Math.pow(somx, 2))));
+		float constant = gemy - rc*gemx;
+		float newValue = constant + rc*(n+1); 
 		return newValue;
 	}
 
-	public double extrapolateTemp() {
+	public float extrapolateTemp() {
 		return extrapolate(tempQueue);
 	}
 	
-	public double extrapolateDewp() {
+	public float extrapolateDewp() {
 		return extrapolate(dewpQueue);
 	}
 	
-	public double extrapolateStp() {
+	public float extrapolateStp() {
 		return extrapolate(stpQueue);
 	}
 	
-	public double extrapolateSlp() {
+	public float extrapolateSlp() {
 		return extrapolate(slpQueue);
 	}
 	
-	public double getVisib() {
+	public float getVisib() {
 		return visib;
 	}
 	
-	public double extrapolateWdsp() {
+	public float extrapolateWdsp() {
 		return extrapolate(wdspQueue);
 	}
 
-	public double getPrcp() {
+	public float getPrcp() {
 		return prcp;
 	}
 
-	public double getSndp() {
+	public float getSndp() {
 		return sndp;
 	}
 
@@ -128,7 +127,7 @@ public class Station {
 		return frshtt;
 	}
 
-	public double getCldc() {
+	public float getCldc() {
 		return cldc;
 	}
 
