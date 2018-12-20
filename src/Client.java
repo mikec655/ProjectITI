@@ -1,9 +1,7 @@
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-
 
 public class Client implements Runnable{
 	
@@ -11,7 +9,6 @@ public class Client implements Runnable{
 	private BufferedReader input;
 	Station[] stations = new Station[10];
 
-	
 	public Client(Socket socket) {
 		this.socket = socket;
 		try {
@@ -20,16 +17,18 @@ public class Client implements Runnable{
 		catch (IOException e){
 			System.out.println(e);
 		}
+		for (int i = 0; i < 10; i++) {
+			stations[i] = new Station();
+		}
 	}
-
+	
 	@Override
 	public void run() {
-    	String xml = "";
+		long startTime;
+		long stopTime;
+		
+		String xml = "";
     	
-    	// variabelen voor het meten van de tijd dat het duurt om 1 bestand te ontvangen
-        long startTime = 0;
-        long stopTime = 0;
-       
     	// leest totdat einde van xml-bestand bereikt is
     	while(true) {
     		try {
@@ -40,194 +39,183 @@ public class Client implements Runnable{
     		} catch (IOException e) {
     			System.out.println(e);
     		}
-    		startTime = System.nanoTime();
+    		
     		// controleer of einde van xml is bereikt
         	if (xml.contains("</WEATHERDATA>")) break;
     	}
-    	// System.out.println(text);
     	
+    	//System.out.println(xml);
+		int charIndex = 58;
+		int[] charIndexSteps = {15, 16, 16, 16, 15, 14, 16, 17, 16, 16, 18, 18, 18, 48};
+		char c;
+		
     	String inserts = ""; //DB inserts
     	
-    	// Parsen van xml bestand per measurement 
-        int charIndex = 58;
-		char c = '\n';
+    	int j = 0;
 		for (int i = 0; i < 10; i++) {
-			if (stations[i]== null) stations[i]= new Station();
 			String str = "";
 			String stn = "";
 			String date = "";
 			String time = "";
-			double temp = 0.0f;
-			float dewp = 0.0f;
-			float stp = 0.0f;
-			float slp = 0.0f;
-			float visib = 0.0f;
-			float wdsp = 0.0f;
-			float prcp = 0.0f;
-			float sndp = 0.0f;
+			double temp = 0.0;
+			double dewp = 0.0f;
+			double stp = 0.0f;
+			double slp = 0.0f;
+			double visib = 0.0f;
+			double wdsp = 0.0f;
+			double prcp = 0.0f;
+			double sndp = 0.0f;
 			String frshtt = "";
-			float cldc = 0.0f;
+			double cldc = 0.0f;
 			int wnddir = 0;
 			
 			while ((c = xml.charAt(charIndex)) != '<') {
 				stn += c;
 				charIndex++;
 			}
-			//System.out.println(stn);
+			charIndex += charIndexSteps[j++];
 			
-			charIndex += 15;
-			while ((c = xml.charAt(charIndex))  != '<') {
+			while ((c = xml.charAt(charIndex)) != '<') {
 				date += c;
 				charIndex++;
 			}
-			//System.out.println(date);
+			charIndex += charIndexSteps[j++];
 			
-			charIndex += 16;
-			while ((c = xml.charAt(charIndex))  != '<') {
+			while ((c = xml.charAt(charIndex)) != '<') {
 				time += c;
 				charIndex++;
 			}
-			//System.out.println(time);
+			charIndex += charIndexSteps[j++];
 			
-			charIndex += 16;
-			while ((c = xml.charAt(charIndex))  != '<') {
+			while ((c = xml.charAt(charIndex)) != '<') {
 				str += c;
 				charIndex++;
 			}
-			//System.out.println(str);
-			double extrapolatedTemp = stations[i].extrapolateTemp();
-			if (!str.isEmpty()) {
-				temp = Double.parseDouble(str);
-				if (temp > extrapolatedTemp * 1.2 && temp < extrapolatedTemp * 0.8) {
-					temp = extrapolatedTemp;
+			charIndex += charIndexSteps[j++];
+			temp = Double.parseDouble(str);
+			if (stations[i].sizeOfTemp() > 0) {
+				double extrapolatedTemp = stations[i].extrapolateTemp();
+				if (Math.abs(temp) > Math.abs(extrapolatedTemp) * 1.2) {
+					temp = extrapolatedTemp * 1.2;
+					//System.out.println("Wrong value -> " + temp);
+				} else if (Math.abs(temp) < Math.abs(extrapolatedTemp) * 0.8) {
+					temp = extrapolatedTemp * 0.8;
+					//System.out.println("Wrong value -> " + temp);
 				}
-			
-			} else {
-				temp = extrapolatedTemp;
 			}
 			stations[i].addTemp(temp);
 			
-			charIndex += 16;
 			str = "";
-			while ((c = xml.charAt(charIndex))  != '<') {
+			while ((c = xml.charAt(charIndex)) != '<') {
 				str += c;
 				charIndex++;
 			}
-			//System.out.println(str);
-			if (!str.isEmpty()) {
-				dewp = Float.parseFloat(str);
-			}
+			charIndex += charIndexSteps[j++];
+			if (str.isEmpty()) dewp = stations[i].extrapolateDewp(); 
+			else dewp = Double.parseDouble(str);
+			stations[i].addDewp(dewp);
 			
-			charIndex += 15;
 			str = "";
-			while ((c = xml.charAt(charIndex))  != '<') {
+			while ((c = xml.charAt(charIndex)) != '<') {
 				str += c;
 				charIndex++;
 			}
-			//System.out.println(str);
-			if (!str.isEmpty()) {
-				stp = Float.parseFloat(str);
-			}
+			charIndex += charIndexSteps[j++];
+			if (str.isEmpty()) stp = stations[i].extrapolateStp(); 
+			else stp = Double.parseDouble(str);
+			stations[i].addStp(stp);
 			
-			charIndex += 14;
 			str = "";
-			while ((c = xml.charAt(charIndex))  != '<') {
+			while ((c = xml.charAt(charIndex)) != '<') {
 				str += c;
 				charIndex++;
 			}
-			//System.out.println(str);
-			if (!str.isEmpty()) {
-				slp = Float.parseFloat(str);
-			}
+			charIndex += charIndexSteps[j++];
+			if (str.isEmpty()) slp = stations[i].extrapolateSlp(); 
+			else slp = Double.parseDouble(str);
+			stations[i].addSlp(slp);
 			
-			charIndex += 16;
 			str = "";
-			while ((c = xml.charAt(charIndex))  != '<') {
+			while ((c = xml.charAt(charIndex)) != '<') {
 				str += c;
 				charIndex++;
 			}
-			//System.out.println(str);
-			if (!str.isEmpty()) {
-				visib = Float.parseFloat(str);
-			}
+			charIndex += charIndexSteps[j++];
+			if (str.isEmpty()) visib = stations[i].extrapolateSlp(); 
+			else visib = Double.parseDouble(str);
+			stations[i].setVisib(visib);
 			
-			charIndex += 17;
 			str = "";
-			while ((c = xml.charAt(charIndex))  != '<') {
+			while ((c = xml.charAt(charIndex)) != '<') {
 				str += c;
 				charIndex++;
 			}
-			//System.out.println(str);
-			if (!str.isEmpty()) {
-				wdsp = Float.parseFloat(str);
-			}
+			charIndex += charIndexSteps[j++];
+			if (str.isEmpty()) wdsp = stations[i].extrapolateWdsp();
+			else wdsp = Double.parseDouble(str);
+			stations[i].addWdsp(wdsp);
 			
-			charIndex += 16;
 			str = "";
-			while ((c = xml.charAt(charIndex))  != '<') {
+			while ((c = xml.charAt(charIndex)) != '<') {
 				str += c;
 				charIndex++;
 			}
-			//System.out.println(str);
-			if (!str.isEmpty()) {
-				prcp = Float.parseFloat(str);
-			}
+			charIndex += charIndexSteps[j++];
+			if (str.isEmpty()) prcp = stations[i].getPrcp();
+			else prcp = Double.parseDouble(str);
+			stations[i].setPrcp(prcp);
 			
-			charIndex += 16;
 			str = "";
-			while ((c = xml.charAt(charIndex))  != '<') {
+			while ((c = xml.charAt(charIndex)) != '<') {
 				str += c;
 				charIndex++;
 			}
-			//System.out.println(str);
-			if (!str.isEmpty()) {
-				sndp = Float.parseFloat(str);
-			}
+			charIndex += charIndexSteps[j++];
+			if (str.isEmpty()) sndp = stations[i].getSndp();
+			else sndp = Double.parseDouble(str);
+			stations[i].setSndp(sndp);
 			
-			charIndex += 18;
-			while ((c = xml.charAt(charIndex))  != '<') {
+			while ((c = xml.charAt(charIndex)) != '<') {
 				frshtt += c;
 				charIndex++;
 			}
-			//System.out.println(frshtt);
+			charIndex += charIndexSteps[j++];
+			if (str.isEmpty()) frshtt = stations[i].getFrshtt();
+			stations[i].setFrshtt(frshtt);
 			
-			charIndex += 18;
 			str = "";
 			while ((c = xml.charAt(charIndex)) != '<') {
 				str += c;
 				charIndex++;
 			}
-			//System.out.println(str);
-			if (!str.isEmpty()) {
-				cldc = Float.parseFloat(str);
-			}
+			charIndex += charIndexSteps[j++];
+			if (str.isEmpty()) cldc = stations[i].getCldc();
+			else cldc = Double.parseDouble(str);
+			stations[i].setCldc(cldc);
 			
-			charIndex += 18;
 			str = "";
 			while ((c = xml.charAt(charIndex)) != '<') {
 				str += c;
 				charIndex++;
 			}
-			//System.out.println(str);
-			if (!str.isEmpty()) {
-				wnddir = Integer.parseInt(str);
-			}
 			
-			charIndex += 48;
+			charIndex += charIndexSteps[j++];
+			if (str.isEmpty()) wnddir = stations[i].getWnddir();
+			else wnddir = Integer.parseInt(str);
+			stations[i].setWnddir(wnddir);
+			j = 0;
 			
-			// opbouwen van query
 			inserts += "(" + stn + ", '" + date + "', '" + time + "', " + temp + ", " + dewp + ", " + stp + ", " + slp + ", " + visib + ", " + wdsp + ", " + prcp + ", " + sndp + ", '" + frshtt + "', " + cldc + ", " + wnddir + ")";
 			if (i < 9) {
 				inserts += ", ";
 			}
-			
 		}
-		// Database.addInsert(inserts);
-		
-		// meten van verstreken tijd 
-		stopTime = System.nanoTime();
-		long speed = stopTime - startTime;
-		//System.out.println("Writing XML file took " + speed + "ns");
+    	
+		//Database.addInsert(inserts);
+	
+		//stopTime = System.nanoTime();
+		//long speed = stopTime - startTime;
+		//System.out.println(speed + "ns");
 		
 	}
 	

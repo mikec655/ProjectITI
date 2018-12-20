@@ -8,20 +8,29 @@ import org.junit.jupiter.api.Test;
 class TestExtrapolate {
 
 	@Test
-	void test() {
-		Deque<Double> tempQueue =new ArrayDeque<Double>();
+	void testOne() {
+		Deque<Double> queue =new ArrayDeque<Double>();
 		for(int x=1 ;x <= 30; x++) {	
-			addValue(x, tempQueue);
+			queue.add((double) x);
 		}
 	
 		Station test = new Station();
-		double output = test.extrapolate(tempQueue);;
-		assertEquals(31.0, output);
+		/*double output = test.extrapolate(queue);;
+		assertEquals(31.0, output);*/
 	}
 	
-	private void addValue(double value, Deque<Double> tempQueue) {
-		tempQueue.add(value);
-		if (tempQueue.size() > 30) {
-			tempQueue.poll();
-		}
-}}
+	@Test
+	void testTwo() {
+		Deque<Double> queue =new ArrayDeque<Double>();
+		queue.add(2.0);
+		queue.add(-2.0);
+		queue.add(2.0);
+		queue.add(-2.0);
+		queue.add(2.0);
+		queue.add(-2.0);
+	
+		Station test = new Station();
+//		double output = test.extrapolate(queue);;
+//		assertEquals(0.0, output);
+	}
+}
