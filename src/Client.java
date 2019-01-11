@@ -208,7 +208,7 @@ public class Client implements Runnable{
 			}
 		}
     	
-		Database.addInsert(inserts);
+		//Database.addInsert(inserts);
 	
 		//stopTime = System.nanoTime();
 		//long speed = stopTime - startTime;
