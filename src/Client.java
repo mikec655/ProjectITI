@@ -47,15 +47,14 @@ public class Client implements Runnable{
     	}
     	
     	long startTime = System.currentTimeMillis();
-    	//System.out.println(xml);
 		int charIndex = 55;
 		int[] charIndexSteps = {14, 15, 15, 15, 14, 13, 15, 16, 15, 15, 17, 17, 17, 45};
 		char c;
-		
-    	byte[] bytes = new byte[43];
     	
     	int j = 0;
 		for (int i = 0; i < 10; i++) {
+			byte[] bytes = new byte[43];
+			
 			String str = "";
 			int stn = 0;
 			String date = "";
@@ -106,11 +105,6 @@ public class Client implements Runnable{
 			bytes[2] = (byte) (time >> 8);
 			bytes[3] = (byte) (time);
 			
-//			System.out.println(bytes[0]);
-//			System.out.println(bytes[1]);
-//			System.out.println(bytes[2]);
-//			System.out.println(bytes[3]);
-			
 			str = "";
 			while ((c = xml.charAt(charIndex)) != '<') {
 				str += c;
@@ -122,20 +116,12 @@ public class Client implements Runnable{
 				float extrapolatedTemp = stations[i].extrapolateTemp();
 				if (Math.abs(temp) > Math.abs(extrapolatedTemp) * 1.2) {
 					temp = extrapolatedTemp * 1.2f;
-					//System.out.println("Wrong value -> " + temp);
 				} else if (Math.abs(temp) < Math.abs(extrapolatedTemp) * 0.8) {
 					temp = extrapolatedTemp * 0.8f;
-					//System.out.println("Wrong value -> " + temp);
 				}
 			}
 			stations[i].addTemp(temp);
 			addFloatToByteArray(bytes, 4, temp);
-			
-//			System.out.println(temp);
-//			System.out.println(bytes[4]);
-//			System.out.println(bytes[5]);
-//			System.out.println(bytes[6]);
-//			System.out.println(bytes[7]);
 			
 			str = "";
 			while ((c = xml.charAt(charIndex)) != '<') {
@@ -146,7 +132,7 @@ public class Client implements Runnable{
 			if (str.isEmpty()) dewp = stations[i].extrapolateDewp(); 
 			else dewp = Float.parseFloat(str);
 			stations[i].addDewp(dewp);
-			addFloatToByteArray(bytes, 8, temp);
+			addFloatToByteArray(bytes, 8, dewp);
 			
 			str = "";
 			while ((c = xml.charAt(charIndex)) != '<') {
@@ -157,7 +143,7 @@ public class Client implements Runnable{
 			if (str.isEmpty()) stp = stations[i].extrapolateStp(); 
 			else stp = Float.parseFloat(str);
 			stations[i].addStp(stp);
-			addFloatToByteArray(bytes, 12, temp);
+			addFloatToByteArray(bytes, 12, stp);
 			
 			str = "";
 			while ((c = xml.charAt(charIndex)) != '<') {
@@ -168,7 +154,7 @@ public class Client implements Runnable{
 			if (str.isEmpty()) slp = stations[i].extrapolateSlp(); 
 			else slp = Float.parseFloat(str);
 			stations[i].addSlp(slp);
-			addFloatToByteArray(bytes, 16, temp);
+			addFloatToByteArray(bytes, 16, slp);
 			
 			str = "";
 			while ((c = xml.charAt(charIndex)) != '<') {
@@ -179,7 +165,7 @@ public class Client implements Runnable{
 			if (str.isEmpty()) visib = stations[i].getVisib(); 
 			else visib = Float.parseFloat(str);
 			stations[i].setVisib(visib);
-			addFloatToByteArray(bytes, 20, temp);
+			addFloatToByteArray(bytes, 20, visib);
 			
 			str = "";
 			while ((c = xml.charAt(charIndex)) != '<') {
@@ -190,7 +176,7 @@ public class Client implements Runnable{
 			if (str.isEmpty()) wdsp = stations[i].extrapolateWdsp();
 			else wdsp = Float.parseFloat(str);
 			stations[i].addWdsp(wdsp);
-			addFloatToByteArray(bytes, 24, temp);
+			addFloatToByteArray(bytes, 24, wdsp);
 			
 			str = "";
 			while ((c = xml.charAt(charIndex)) != '<') {
@@ -201,7 +187,7 @@ public class Client implements Runnable{
 			if (str.isEmpty()) prcp = stations[i].getPrcp();
 			else prcp = Float.parseFloat(str);
 			stations[i].setPrcp(prcp);
-			addFloatToByteArray(bytes, 28, temp);
+			addFloatToByteArray(bytes, 28, prcp);
 			
 			str = "";
 			while ((c = xml.charAt(charIndex)) != '<') {
@@ -212,7 +198,7 @@ public class Client implements Runnable{
 			if (str.isEmpty()) sndp = stations[i].getSndp();
 			else sndp = Float.parseFloat(str);
 			stations[i].setSndp(sndp);
-			addFloatToByteArray(bytes, 32, temp);
+			addFloatToByteArray(bytes, 32, sndp);
 			
 			str = "";
 			while ((c = xml.charAt(charIndex)) != '<') {
@@ -252,27 +238,14 @@ public class Client implements Runnable{
 			
 			
 			try {
-				File f = new File("data/" + date + "/" + stn + ".dat");
-				f.createNewFile(); // if file already exists will do nothing 
+				File f = new File(stn + ".dat");
+				f.createNewFile(); 
 				FileOutputStream fos = new FileOutputStream(f, true);
 				fos.write(bytes);
 			} catch (IOException e) {
 				System.out.println(e);
 			}
-//			
-//			System.out.println(stn);
-//			System.out.println(date);
-//			System.out.println(time);
-//			System.out.println(temp);
-//			System.out.println(dewp);
-//			System.out.println(stp);
-//			System.out.println(slp);
-//			System.out.println(visib);
-//			System.out.println(prcp);
-//			System.out.println(sndp);
-//			System.out.println(frshtt);
-//			System.out.println(cldc);
-//			System.out.println(wnddir);
+			
 		}
 	
 		long stopTime = System.currentTimeMillis();
