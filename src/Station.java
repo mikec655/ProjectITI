@@ -14,7 +14,7 @@ public class Station {
 	private int frshtt;
 	private float cldc;
 	private int wnddir;
-	
+
 	// Setters and Adders
 	private void addValue(float value, Deque<Float> queue) {
 		queue.add(value);
@@ -67,29 +67,15 @@ public class Station {
 		this.wnddir = wnddir;
 	}
 
-	// Getters and Extrapolations
+	// Getters and Extrapolation
 	private float extrapolate(Deque<Float> queue) {
-		int n = queue.size();
-		if (n <= 1) return 0;
-		float somy = 0;
-		float somxy = 0;
-		float x = 1;
-		float somx = 0;
-		float somx2 = 0;
-		for(float y: queue) {
-			float product = x * y;
-			somxy += product;
-			somy += y;
-			somx += x;
-			somx2 += Math.pow(x, 2);
-			x++;
+		float average = 0;
+		float sum = 0;
+		for(float y: queue){
+			sum += y; 
 		}
-		float gemx = somx / n;
-		float gemy = somy / n;
-		float rc = (float) (((n * somxy) - (somx * somy)) / ((n * somx2) - (Math.pow(somx, 2))));
-		float constant = gemy - rc*gemx;
-		float newValue = constant + rc*(n+1); 
-		return newValue;
+		average = sum / queue.size();
+		return average;
 	}
 
 	public float extrapolateTemp() {

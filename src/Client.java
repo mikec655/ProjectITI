@@ -1,4 +1,5 @@
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -30,8 +31,6 @@ public class Client implements Runnable{
 	
 	@Override
 	public void run() {
-		
-		
 		String xml = "";
     	
     	// leest totdat einde van xml-bestand bereikt is
@@ -252,11 +251,14 @@ public class Client implements Runnable{
 			j = 0;
 			
 			
-//			try (FileOutputStream fos = new FileOutputStream(stn + ".dat")) {
-//				fos.write(bytes);
-//			} catch (IOException e) {
-//				System.out.println(e);
-//			}
+			try {
+				File f = new File("data/" + date + "/" + stn + ".dat");
+				f.createNewFile(); // if file already exists will do nothing 
+				FileOutputStream fos = new FileOutputStream(f, true);
+				fos.write(bytes);
+			} catch (IOException e) {
+				System.out.println(e);
+			}
 //			
 //			System.out.println(stn);
 //			System.out.println(date);
