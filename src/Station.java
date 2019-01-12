@@ -11,7 +11,7 @@ public class Station {
 	private Deque<Float> wdspQueue = new ArrayDeque<Float>();
 	private float prcp;
 	private float sndp;
-	private String frshtt;
+	private int frshtt;
 	private float cldc;
 	private int wnddir;
 	
@@ -55,7 +55,7 @@ public class Station {
 		this.sndp = sndp;
 	}
 
-	public void setFrshtt(String frshtt) {
+	public void setFrshtt(int frshtt) {
 		this.frshtt = frshtt;
 	}
 
@@ -69,12 +69,13 @@ public class Station {
 
 	// Getters and Extrapolations
 	private float extrapolate(Deque<Float> queue) {
+		int n = queue.size();
+		if (n <= 1) return 0;
 		float somy = 0;
 		float somxy = 0;
 		float x = 1;
 		float somx = 0;
 		float somx2 = 0;
-		int n = queue.size();
 		for(float y: queue) {
 			float product = x * y;
 			somxy += product;
@@ -123,7 +124,7 @@ public class Station {
 		return sndp;
 	}
 
-	public String getFrshtt() {
+	public int getFrshtt() {
 		return frshtt;
 	}
 

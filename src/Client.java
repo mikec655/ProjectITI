@@ -1,7 +1,13 @@
 import java.io.BufferedReader;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
+
 
 public class Client implements Runnable{
 	
@@ -24,6 +30,8 @@ public class Client implements Runnable{
 	
 	@Override
 	public void run() {
+		
+		
 		String xml = "";
     	
     	// leest totdat einde van xml-bestand bereikt is
@@ -32,28 +40,27 @@ public class Client implements Runnable{
     			// inlezen van xml per lijn
     			String line;
     			if ((line = input.readLine()) == null) return;
-    			else xml += line + "\n";
+    			else xml += line;
+    			if (line.equals("</WEATHERDATA>")) break;
     		} catch (IOException e) {
     			System.out.println(e);
     		}
-    		
-    		// controleer of einde van xml is bereikt
-        	if (xml.contains("</WEATHERDATA>")) break;
     	}
     	
+    	long startTime = System.currentTimeMillis();
     	//System.out.println(xml);
-		int charIndex = 58;
-		int[] charIndexSteps = {15, 16, 16, 16, 15, 14, 16, 17, 16, 16, 18, 18, 18, 48};
+		int charIndex = 55;
+		int[] charIndexSteps = {14, 15, 15, 15, 14, 13, 15, 16, 15, 15, 17, 17, 17, 45};
 		char c;
 		
-    	String inserts = ""; //DB inserts
+    	byte[] bytes = new byte[43];
     	
     	int j = 0;
 		for (int i = 0; i < 10; i++) {
 			String str = "";
-			String stn = "";
+			int stn = 0;
 			String date = "";
-			String time = "";
+			int time = 0;
 			float temp = 0.0f;
 			float dewp = 0.0f;
 			float stp = 0.0f;
@@ -62,16 +69,22 @@ public class Client implements Runnable{
 			float wdsp = 0.0f;
 			float prcp = 0.0f;
 			float sndp = 0.0f;
-			String frshtt = "";
+			int frshtt = 0;
 			float cldc = 0.0f;
 			int wnddir = 0;
 			
 			while ((c = xml.charAt(charIndex)) != '<') {
-				stn += c;
+				str += c;
 				charIndex++;
 			}
 			charIndex += charIndexSteps[j++];
-			
+			stn = Integer.parseInt(str);
+//			bytes[0] = (byte) (stn >> 24);
+//			bytes[1] = (byte) (stn >> 16);
+//			bytes[2] = (byte) (stn >> 8);
+//			bytes[3] = (byte) (stn);
+
+			str = "";
 			while ((c = xml.charAt(charIndex)) != '<') {
 				date += c;
 				charIndex++;
@@ -79,11 +92,27 @@ public class Client implements Runnable{
 			charIndex += charIndexSteps[j++];
 			
 			while ((c = xml.charAt(charIndex)) != '<') {
-				time += c;
+				str += c;
 				charIndex++;
 			}
 			charIndex += charIndexSteps[j++];
+			DateFormat sdf = new SimpleDateFormat("hh:mm:ss");
+			try {
+				time = (int) sdf.parse(str).getTime();
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+			bytes[0] = (byte) (time >> 24);
+			bytes[1] = (byte) (time >> 16);
+			bytes[2] = (byte) (time >> 8);
+			bytes[3] = (byte) (time);
 			
+//			System.out.println(bytes[0]);
+//			System.out.println(bytes[1]);
+//			System.out.println(bytes[2]);
+//			System.out.println(bytes[3]);
+			
+			str = "";
 			while ((c = xml.charAt(charIndex)) != '<') {
 				str += c;
 				charIndex++;
@@ -101,6 +130,13 @@ public class Client implements Runnable{
 				}
 			}
 			stations[i].addTemp(temp);
+			addFloatToByteArray(bytes, 4, temp);
+			
+//			System.out.println(temp);
+//			System.out.println(bytes[4]);
+//			System.out.println(bytes[5]);
+//			System.out.println(bytes[6]);
+//			System.out.println(bytes[7]);
 			
 			str = "";
 			while ((c = xml.charAt(charIndex)) != '<') {
@@ -111,6 +147,7 @@ public class Client implements Runnable{
 			if (str.isEmpty()) dewp = stations[i].extrapolateDewp(); 
 			else dewp = Float.parseFloat(str);
 			stations[i].addDewp(dewp);
+			addFloatToByteArray(bytes, 8, temp);
 			
 			str = "";
 			while ((c = xml.charAt(charIndex)) != '<') {
@@ -121,6 +158,7 @@ public class Client implements Runnable{
 			if (str.isEmpty()) stp = stations[i].extrapolateStp(); 
 			else stp = Float.parseFloat(str);
 			stations[i].addStp(stp);
+			addFloatToByteArray(bytes, 12, temp);
 			
 			str = "";
 			while ((c = xml.charAt(charIndex)) != '<') {
@@ -131,6 +169,7 @@ public class Client implements Runnable{
 			if (str.isEmpty()) slp = stations[i].extrapolateSlp(); 
 			else slp = Float.parseFloat(str);
 			stations[i].addSlp(slp);
+			addFloatToByteArray(bytes, 16, temp);
 			
 			str = "";
 			while ((c = xml.charAt(charIndex)) != '<') {
@@ -138,9 +177,10 @@ public class Client implements Runnable{
 				charIndex++;
 			}
 			charIndex += charIndexSteps[j++];
-			if (str.isEmpty()) visib = stations[i].extrapolateSlp(); 
+			if (str.isEmpty()) visib = stations[i].getVisib(); 
 			else visib = Float.parseFloat(str);
 			stations[i].setVisib(visib);
+			addFloatToByteArray(bytes, 20, temp);
 			
 			str = "";
 			while ((c = xml.charAt(charIndex)) != '<') {
@@ -151,6 +191,7 @@ public class Client implements Runnable{
 			if (str.isEmpty()) wdsp = stations[i].extrapolateWdsp();
 			else wdsp = Float.parseFloat(str);
 			stations[i].addWdsp(wdsp);
+			addFloatToByteArray(bytes, 24, temp);
 			
 			str = "";
 			while ((c = xml.charAt(charIndex)) != '<') {
@@ -161,6 +202,7 @@ public class Client implements Runnable{
 			if (str.isEmpty()) prcp = stations[i].getPrcp();
 			else prcp = Float.parseFloat(str);
 			stations[i].setPrcp(prcp);
+			addFloatToByteArray(bytes, 28, temp);
 			
 			str = "";
 			while ((c = xml.charAt(charIndex)) != '<') {
@@ -171,14 +213,18 @@ public class Client implements Runnable{
 			if (str.isEmpty()) sndp = stations[i].getSndp();
 			else sndp = Float.parseFloat(str);
 			stations[i].setSndp(sndp);
+			addFloatToByteArray(bytes, 32, temp);
 			
+			str = "";
 			while ((c = xml.charAt(charIndex)) != '<') {
-				frshtt += c;
+				str += c;
 				charIndex++;
 			}
 			charIndex += charIndexSteps[j++];
 			if (str.isEmpty()) frshtt = stations[i].getFrshtt();
+			else frshtt = Integer.parseInt(str, 2);
 			stations[i].setFrshtt(frshtt);
+			bytes[36] = (byte) (frshtt);
 			
 			str = "";
 			while ((c = xml.charAt(charIndex)) != '<') {
@@ -189,6 +235,7 @@ public class Client implements Runnable{
 			if (str.isEmpty()) cldc = stations[i].getCldc();
 			else cldc = Float.parseFloat(str);
 			stations[i].setCldc(cldc);
+			addFloatToByteArray(bytes, 37, cldc);
 			
 			str = "";
 			while ((c = xml.charAt(charIndex)) != '<') {
@@ -200,20 +247,44 @@ public class Client implements Runnable{
 			if (str.isEmpty()) wnddir = stations[i].getWnddir();
 			else wnddir = Integer.parseInt(str);
 			stations[i].setWnddir(wnddir);
+			bytes[41] = (byte) (wnddir >> 8);
+			bytes[42] = (byte) wnddir;
 			j = 0;
 			
-			inserts += "(" + stn + ", '" + date + "', '" + time + "', " + temp + ", " + dewp + ", " + stp + ", " + slp + ", " + visib + ", " + wdsp + ", " + prcp + ", " + sndp + ", '" + frshtt + "', " + cldc + ", " + wnddir + ")";
-			if (i < 9) {
-				inserts += ", ";
-			}
+			
+//			try (FileOutputStream fos = new FileOutputStream(stn + ".dat")) {
+//				fos.write(bytes);
+//			} catch (IOException e) {
+//				System.out.println(e);
+//			}
+//			
+//			System.out.println(stn);
+//			System.out.println(date);
+//			System.out.println(time);
+//			System.out.println(temp);
+//			System.out.println(dewp);
+//			System.out.println(stp);
+//			System.out.println(slp);
+//			System.out.println(visib);
+//			System.out.println(prcp);
+//			System.out.println(sndp);
+//			System.out.println(frshtt);
+//			System.out.println(cldc);
+//			System.out.println(wnddir);
 		}
-    	
-		Database.addInsert(inserts);
 	
-		//stopTime = System.nanoTime();
-		//long speed = stopTime - startTime;
-		//System.out.println(speed + "ns");
+		long stopTime = System.currentTimeMillis();
+		long speed = stopTime - startTime;
+		System.out.println(speed + "ms");
 		
+	}
+	
+	private static void addFloatToByteArray(byte[] array, int index, float var) {
+		byte[] newBytes = ByteBuffer.allocate(4).putFloat(var).array();
+		array[index + 0] = newBytes[0];
+		array[index + 1] = newBytes[1];
+		array[index + 2] = newBytes[2];
+		array[index + 3] = newBytes[3];
 	}
 	
 	public void close() {
