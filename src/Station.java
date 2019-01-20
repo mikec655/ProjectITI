@@ -1,8 +1,15 @@
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
 
 public class Station {
+	private byte[][] records = new byte[60][43];
+	private int recordIndex = 0;
+	private int stn;
+	private String date;
 	private Deque<Float> tempQueue = new ArrayDeque<Float>();
 	private Deque<Float> dewpQueue = new ArrayDeque<Float>();
 	private Deque<Float> stpQueue = new ArrayDeque<Float>();
@@ -14,6 +21,32 @@ public class Station {
 	private int frshtt;
 	private float cldc;
 	private int wnddir;
+	
+	// bytes
+	public void addRecord(byte[] record) {
+		records[recordIndex] = record;
+		recordIndex++;
+		if (recordIndex == 60){
+			recordIndex = 0;
+			writeRecords();
+		}
+	}
+	
+	private void writeRecords() {
+		try {
+			File f = new File("data/" + date);
+			f.mkdirs();
+			f = new File("data/" + date + "/"+ stn + ".dat");
+			f.createNewFile(); 
+			FileOutputStream fos = new FileOutputStream(f, true);
+			for (int i = 0; i < 60; i++) {
+				fos.write(records[i]);
+			}
+			fos.close();
+		} catch (IOException e) {
+			System.out.println(e);
+		}
+	}
 
 	// Setters and Adders
 	private void addValue(float value, Deque<Float> queue) {
@@ -21,6 +54,14 @@ public class Station {
 		if (queue.size() > 30) {
 			queue.poll();
 		}
+	}
+	
+	public void setStn(int stn) {
+		this.stn = stn;
+	}
+	
+	public void setDate(String date) {
+		this.date = date;
 	}
 	
 	public void addTemp(float temp) {
@@ -75,7 +116,7 @@ public class Station {
 			sum += y; 
 		}
 		average = sum / queue.size();
-		return average;
+		return Math.round(average * 10) / 10;
 	}
 
 	public float extrapolateTemp() {

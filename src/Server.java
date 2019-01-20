@@ -1,4 +1,5 @@
 
+import java.io.File;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.Executors;
@@ -16,6 +17,7 @@ public abstract class Server
   
     public static void main(String args[]) 
     { 
+    	new File("data").mkdir();
     	
     	// Aanmaken van een Threadpool met Scheduler
     	executor = Executors.newScheduledThreadPool(MAX_CLIENTS);

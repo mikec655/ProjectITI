@@ -1,6 +1,4 @@
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
@@ -54,7 +52,6 @@ public class Client implements Runnable{
     	int j = 0;
 		for (int i = 0; i < 10; i++) {
 			byte[] bytes = new byte[43];
-			
 			String str = "";
 			int stn = 0;
 			String date = "";
@@ -70,17 +67,14 @@ public class Client implements Runnable{
 			int frshtt = 0;
 			float cldc = 0.0f;
 			int wnddir = 0;
-			
+	
 			while ((c = xml.charAt(charIndex)) != '<') {
 				str += c;
 				charIndex++;
 			}
 			charIndex += charIndexSteps[j++];
 			stn = Integer.parseInt(str);
-//			bytes[0] = (byte) (stn >> 24);
-//			bytes[1] = (byte) (stn >> 16);
-//			bytes[2] = (byte) (stn >> 8);
-//			bytes[3] = (byte) (stn);
+			stations[i].setStn(stn);
 
 			str = "";
 			while ((c = xml.charAt(charIndex)) != '<') {
@@ -88,18 +82,20 @@ public class Client implements Runnable{
 				charIndex++;
 			}
 			charIndex += charIndexSteps[j++];
+			stations[i].setDate(date);
 			
 			while ((c = xml.charAt(charIndex)) != '<') {
 				str += c;
 				charIndex++;
 			}
 			charIndex += charIndexSteps[j++];
-			DateFormat sdf = new SimpleDateFormat("hh:mm:ss");
+			DateFormat sdf = new SimpleDateFormat("HH:mm:ss");
 			try {
 				time = (int) sdf.parse(str).getTime();
 			} catch (ParseException e) {
 				e.printStackTrace();
 			}
+			
 			bytes[0] = (byte) (time >> 24);
 			bytes[1] = (byte) (time >> 16);
 			bytes[2] = (byte) (time >> 8);
@@ -236,21 +232,13 @@ public class Client implements Runnable{
 			bytes[42] = (byte) wnddir;
 			j = 0;
 			
-			
-			try {
-				File f = new File(stn + ".dat");
-				f.createNewFile(); 
-				FileOutputStream fos = new FileOutputStream(f, true);
-				fos.write(bytes);
-			} catch (IOException e) {
-				System.out.println(e);
-			}
+			stations[i].addRecord(bytes);
 			
 		}
 	
 		long stopTime = System.currentTimeMillis();
 		long speed = stopTime - startTime;
-		System.out.println(speed + "ms");
+		//System.out.println(speed + "ms");
 		
 	}
 	
