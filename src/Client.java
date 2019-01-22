@@ -93,10 +93,10 @@ public class Client implements Runnable{
 			if (stations[i].sizeOfTemp() > 0) {
 				float extrapolatedTemp = stations[i].extrapolateTemp();
 				if (Math.abs(temp) > Math.abs(extrapolatedTemp) * 1.2) {
-					temp = extrapolatedTemp * 1.2f;
+					temp = extrapolatedTemp;
 					//System.out.println("Wrong value -> " + temp);
 				} else if (Math.abs(temp) < Math.abs(extrapolatedTemp) * 0.8) {
-					temp = extrapolatedTemp * 0.8f;
+					temp = extrapolatedTemp;
 					//System.out.println("Wrong value -> " + temp);
 				}
 			}
