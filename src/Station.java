@@ -33,10 +33,11 @@ public class Station {
 	}
 	
 	private void writeRecords() {
+		long startTime = System.currentTimeMillis();
 		try {
-			File f = new File("data/" + date);
+			File f = new File("Public/data/" + date);
 			f.mkdirs();
-			f = new File("data/" + date + "/"+ stn + ".dat");
+			f = new File("Public/data/" + date + "/"+ stn + ".dat");
 			f.createNewFile(); 
 			FileOutputStream fos = new FileOutputStream(f, true);
 			for (int i = 0; i < 60; i++) {
@@ -46,6 +47,9 @@ public class Station {
 		} catch (IOException e) {
 			System.out.println(e);
 		}
+		long stopTime = System.currentTimeMillis();
+		long speed = stopTime - startTime;
+		System.out.println("Writing XML took " + speed + "ms");
 	}
 
 	// Setters and Adders

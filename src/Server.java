@@ -13,7 +13,6 @@ public abstract class Server
 	private static int clientCounter = 0;
 	private static ScheduledExecutorService executor;
 	private static ServerSocket server;
-	public static boolean semafor = true;
   
     public static void main(String args[]) 
     { 

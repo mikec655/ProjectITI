@@ -238,7 +238,7 @@ public class Client implements Runnable{
 	
 		long stopTime = System.currentTimeMillis();
 		long speed = stopTime - startTime;
-		//System.out.println(speed + "ms");
+		System.out.println("Reading XML took " + speed + "ms");
 		
 	}
 	
