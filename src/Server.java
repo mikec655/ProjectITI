@@ -19,7 +19,7 @@ public abstract class Server
     	new File("data").mkdir();
     	
     	// Aanmaken van een Threadpool met Scheduler
-    	executor = Executors.newScheduledThreadPool(MAX_CLIENTS);
+    	 executor = Executors.newScheduledThreadPool( MAX_CLIENTS);
 
         Socket connection; // Client socket
 		try {
@@ -32,6 +32,7 @@ public abstract class Server
 				connection = server.accept();		
 				// Client in Thread stoppen
 				Thread client = new Thread(new Client(connection));
+				client.setPriority(Thread.MAX_PRIORITY);
 				clientCounter++;
 				//Thread toevoegen aan Threadpool
 				long delay = 1000 + clientCounter - (System.currentTimeMillis() % 1000);

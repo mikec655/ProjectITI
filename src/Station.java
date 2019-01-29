@@ -6,7 +6,7 @@ import java.util.Deque;
 
 
 public class Station {
-	private byte[][] records = new byte[60][43];
+	private byte[] records = new byte[60 * 43];
 	private int recordIndex = 0;
 	private int stn;
 	private String date;
@@ -24,32 +24,40 @@ public class Station {
 	
 	// bytes
 	public void addRecord(byte[] record) {
-		records[recordIndex] = record;
+		for(int i = 0; i < 43; i++) {
+			this.records[recordIndex * 43 + i] = record[i];
+		}
 		recordIndex++;
 		if (recordIndex == 60){
 			recordIndex = 0;
-			writeRecords();
+			//writeRecords();
 		}
 	}
 	
 	private void writeRecords() {
-		long startTime = System.currentTimeMillis();
-		try {
-			File f = new File("Public/data/" + date);
-			f.mkdirs();
-			f = new File("Public/data/" + date + "/"+ stn + ".dat");
-			f.createNewFile(); 
-			FileOutputStream fos = new FileOutputStream(f, true);
-			for (int i = 0; i < 60; i++) {
-				fos.write(records[i]);
-			}
-			fos.close();
-		} catch (IOException e) {
-			System.out.println(e);
-		}
-		long stopTime = System.currentTimeMillis();
-		long speed = stopTime - startTime;
-		System.out.println("Writing XML took " + speed + "ms");
+		Thread writer = new Thread(new Runnable(){
+			@Override
+			public void run() {
+				long startTime = System.currentTimeMillis();
+				try {
+					File f = new File("data/" + date);
+					f.mkdirs();
+					f = new File("data/" + date + "/"+ stn + ".dat");
+					f.createNewFile(); 
+					FileOutputStream fos = new FileOutputStream(f, true);
+					fos.write(records);
+					fos.close();
+				} catch (IOException e) {
+					System.out.println(e);
+				}
+				long stopTime = System.currentTimeMillis();
+				long speed = stopTime - startTime;
+				System.out.println("Writing XML took " + speed + "ms");
+			} 
+		});
+		writer.setPriority(Thread.MAX_PRIORITY);
+		writer.start();
+		
 	}
 
 	// Setters and Adders
