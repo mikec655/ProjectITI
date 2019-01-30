@@ -1,15 +1,13 @@
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.StringReader;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
-public class Client implements Runnable{
+public class Client {
 	
 	private Socket socket;
 	private BufferedReader input;
@@ -28,8 +26,7 @@ public class Client implements Runnable{
 		}
 	}
 	
-	@Override
-	public void run() {	
+	public void read() {	
 		String xml = "";
     	
     	// leest totdat einde van xml-bestand bereikt is
@@ -37,15 +34,20 @@ public class Client implements Runnable{
     		try {
     			// inlezen van xml per lijn
     			String line;
-    			if ((line = input.readLine()) == null) return;
-    			else xml += line;
+    			if (!input.ready()) {
+    				return;
+    			}
+    			else {
+    				line = input.readLine();
+    				xml = xml.concat(line);
+    			}
     			if (line.equals("</WEATHERDATA>")) break;
     		} catch (IOException e) {
     			System.err.println(e + "X");
     			close();
     		}
     	}
-    	
+
     	long startTime = System.nanoTime();
 		int charIndex = 55;
 		int[] charIndexSteps = {14, 15, 15, 15, 14, 13, 15, 16, 15, 15, 17, 17, 17, 45};
@@ -58,16 +60,13 @@ public class Client implements Runnable{
 			String str = new String();
 			int num = 0;
 			float f = 0;
-			int strIndex =0;
+			int strIndex = 0;
 			
 			while ((c = xml.charAt(charIndex)) != '<') {
-				//str = str.concat(c);
 				strIndex ++;
 				charIndex++;
 			}
 			str = xml.substring(charIndex-strIndex, charIndex);
-			
-			//System.out.println(str);
 			charIndex += charIndexSteps[j++];
 			num = Integer.parseInt(str);
 			stations[i].setStn(num);
@@ -75,7 +74,6 @@ public class Client implements Runnable{
 			strIndex = 0;
 			str = "";
 			while ((c = xml.charAt(charIndex)) != '<') {
-				//str += c;
 				strIndex ++;
 				charIndex++;
 			}
@@ -97,7 +95,7 @@ public class Client implements Runnable{
 			} catch (ParseException e) {
 				e.printStackTrace();
 			}
-			
+					
 			bytes[0] = (byte) (num >> 24);
 			bytes[1] = (byte) (num >> 16);
 			bytes[2] = (byte) (num >> 8);
@@ -262,7 +260,7 @@ public class Client implements Runnable{
 		
 		long stopTime = System.nanoTime();
 		long speed = stopTime - startTime;
-		if (speed > 1000000) {
+		if (speed < 0) {
 			System.out.println("Reading XML took " + speed + "ms");
 		}
 		
