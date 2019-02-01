@@ -20,7 +20,7 @@ public class Station {
 	private float sndp;
 	private int frshtt;
 	private float cldc;
-	private int wnddir;
+	private short wnddir;
 	
 	// bytes
 	public void addRecord(byte[] record) {
@@ -30,34 +30,22 @@ public class Station {
 		recordIndex++;
 		if (recordIndex == 60){
 			recordIndex = 0;
-			//writeRecords();
+			writeRecords();
 		}
 	}
 	
 	private void writeRecords() {
-		Thread writer = new Thread(new Runnable(){
-			@Override
-			public void run() {
-				long startTime = System.currentTimeMillis();
-				try {
-					File f = new File("data/" + date);
-					f.mkdirs();
-					f = new File("data/" + date + "/"+ stn + ".dat");
-					f.createNewFile(); 
-					FileOutputStream fos = new FileOutputStream(f, true);
-					fos.write(records);
-					fos.close();
-				} catch (IOException e) {
-					System.out.println(e);
-				}
-				long stopTime = System.currentTimeMillis();
-				long speed = stopTime - startTime;
-				System.out.println("Writing XML took " + speed + "ms");
-			} 
-		});
-		writer.setPriority(Thread.MAX_PRIORITY);
-		writer.start();
-		
+		try {
+			File f = new File("Public/data/" + date);
+			f.mkdirs();
+			f = new File("Public/data/" + date + "/"+ stn + ".dat");
+			f.createNewFile(); 
+			FileOutputStream fos = new FileOutputStream(f, true);
+			fos.write(records);
+			fos.close();
+		} catch (IOException e) {
+			System.out.println(e);
+		}
 	}
 
 	// Setters and Adders
@@ -116,7 +104,7 @@ public class Station {
 		this.cldc = cldc;
 	}
 
-	public void setWnddir(int wnddir) {
+	public void setWnddir(short wnddir) {
 		this.wnddir = wnddir;
 	}
 
@@ -129,6 +117,10 @@ public class Station {
 		}
 		average = sum / queue.size();
 		return Math.round(average * 10) / 10;
+	}
+	
+	public String getDate() {
+		return date;
 	}
 
 	public float extrapolateTemp() {
@@ -171,7 +163,7 @@ public class Station {
 		return cldc;
 	}
 
-	public int getWnddir() {
+	public short getWnddir() {
 		return wnddir;
 	}
 	
