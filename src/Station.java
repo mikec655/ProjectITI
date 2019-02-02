@@ -22,7 +22,7 @@ public class Station {
 	private float cldc;
 	private short wnddir;
 	
-	// bytes
+	// Add bytes to byte array
 	public void addRecord(byte[] record) {
 		for(int i = 0; i < 43; i++) {
 			this.records[recordIndex * 43 + i] = record[i];
@@ -34,11 +34,12 @@ public class Station {
 		}
 	}
 	
+	// Write bytes to file
 	private void writeRecords() {
 		try {
 			File f = new File("Public/data/" + date);
 			f.mkdirs();
-			f = new File("Public/data/" + date + "/"+ stn + ".dat");
+			f = new File("Public/data/" + date + "/" + stn + ".dat");
 			f.createNewFile(); 
 			FileOutputStream fos = new FileOutputStream(f, true);
 			fos.write(records);

@@ -12,10 +12,27 @@ public class Client implements Runnable{
 	
 	private Socket socket;
 	private BufferedReader input;
-	Station[] stations = new Station[10];
+	private Station[] stations = new Station[10];
+	private boolean alive;
+	private String xml;
+	private int charIndex;
+	private int valueIndex;
+	private static int[] charIndexSteps = {
+		14, 15, 15, 15, 14, 13, 15, 16, 15, 15, 17, 17, 17, 45
+	};
 
 	public Client(Socket socket) {
 		this.socket = socket;
+		for (int i = 0; i < 10; i++) {
+			stations[i] = new Station();
+		}
+		alive = true;
+		
+		xml = new String();
+		charIndex = 55;
+		valueIndex = 0;
+		
+	    // Setting buffer sizes
 		try {
 			socket.setReceiveBufferSize(4194304);
 			input = new BufferedReader(new InputStreamReader(socket.getInputStream()), 65536);
@@ -24,245 +41,179 @@ public class Client implements Runnable{
 		} catch (IOException e2){
 			e2.printStackTrace();
 		}
-		for (int i = 0; i < 10; i++) {
-			stations[i] = new Station();
-		}
+		
 	}
 	
 	@Override
 	public void run() {
-		boolean alive = true;
 		while (alive) {
-			StringBuilder xmlBuilder = new StringBuilder(1400);
-	    	
-	    	// leest totdat einde van xml-bestand bereikt is
-	    	while(true) {
-	    		try {
-	    			// inlezen van xml per lijn
-					String line = input.readLine();
-	    			xmlBuilder.append(line);
-	    			if (line.equals("</WEATHERDATA>")) break;
-	    		} catch (IOException e) {
-	    			System.err.println(e);
-	    			close();
-	    			alive = false;
-	    		}
-	    	}
+			receiveXML();
+			parseXML();
+		}
+	}
+			
+	private void receiveXML() {
+		StringBuilder xmlBuilder = new StringBuilder(1400);
+    	
+    	// Read from socket until the end of XML file
+    	while(true) {
+    		try {
+    			// Read XML file per lien 
+				String line = input.readLine();
+    			xmlBuilder.append(line);
+    			if (line.equals("</WEATHERDATA>")) break;
+    		} catch (IOException e) {
+    			// Close socket and stop thread form running when Exception occurred
+    			System.err.println(e);
+    			close();
+    			alive = false;
+    		}
+    	}
+
+    	xml = xmlBuilder.toString();
+	}
 	
-	    	String xml = xmlBuilder.toString();
-			int charIndex = 55;
-			int[] charIndexSteps = {14, 15, 15, 15, 14, 13, 15, 16, 15, 15, 17, 17, 17, 45};
-	    	
-	    	int j = 0;
-			for (int i = 0; i < 10; i++) {
-				char c;
-				ByteBuffer bytes = ByteBuffer.allocate(43);
-				String str = new String();
-				int num = 0;
-				float f = 0;
-				short s = 0;
-				int strIndex = 0;
-				
-				while ((c = xml.charAt(charIndex)) != '<') {
-					strIndex ++;
-					charIndex++;
-				}
-				str = xml.substring(charIndex-strIndex, charIndex);
-				charIndex += charIndexSteps[j++];
-				num = Integer.parseInt(str);
-				stations[i].setStn(num);
-	
-				strIndex = 0;
-				str = "";
-				while ((c = xml.charAt(charIndex)) != '<') {
-					strIndex ++;
-					charIndex++;
-				}
-				str = xml.substring(charIndex-strIndex, charIndex);
-				charIndex += charIndexSteps[j++];
-				stations[i].setDate(str);
-				
-				strIndex = 0;
-				str = "";
-				while ((c = xml.charAt(charIndex)) != '<') {
-					strIndex ++;
-					charIndex++;
-				}
-				str = xml.substring(charIndex-strIndex, charIndex);
-				charIndex += charIndexSteps[j++];
-				if (str.isEmpty()) {
-					str = stations[i].getDate();
-				}
-				DateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-				try {
-					num = (int) sdf.parse(str).getTime();
-				} catch (ParseException e) {
-					System.out.println(socket.getPort());
-					e.printStackTrace();
-				}
-				bytes.putInt(num);
-				
-				strIndex = 0;
-				str = "";
-				while ((c = xml.charAt(charIndex)) != '<') {
-					strIndex ++;
-					charIndex++;
-				}
-				str = xml.substring(charIndex-strIndex, charIndex);
-				charIndex += charIndexSteps[j++];
-				f = Float.parseFloat(str);
-				if (stations[i].sizeOfTemp() > 0) {
-					float extrapolatedTemp = stations[i].extrapolateTemp();
-					if (Math.abs(f) > Math.abs(extrapolatedTemp) * 1.2) {
-						f = extrapolatedTemp ;
-					} else if (Math.abs(f) < Math.abs(extrapolatedTemp) * 0.8) {
-						f = extrapolatedTemp ;
-					}
-				}
-				stations[i].addTemp(f);
-				bytes.putFloat(f);
-				
-				strIndex = 0;
-				str = "";
-				while ((c = xml.charAt(charIndex)) != '<') {
-					strIndex ++;
-					charIndex++;
-				}
-				str = xml.substring(charIndex-strIndex, charIndex);
-				charIndex += charIndexSteps[j++];
-				if (str.isEmpty()) f = stations[i].extrapolateDewp(); 
-				else f = Float.parseFloat(str);
-				stations[i].addDewp(f);
-				bytes.putFloat(f);
-				
-				strIndex = 0;
-				str = "";
-				while ((c = xml.charAt(charIndex)) != '<') {
-					strIndex ++;
-					charIndex++;
-				}
-				str = xml.substring(charIndex-strIndex, charIndex);
-				charIndex += charIndexSteps[j++];
-				if (str.isEmpty()) f = stations[i].extrapolateStp(); 
-				else f = Float.parseFloat(str);
-				stations[i].addStp(f);
-				bytes.putFloat(f);
-				
-				strIndex = 0;
-				str = "";
-				while ((c = xml.charAt(charIndex)) != '<') {
-					strIndex ++;
-					charIndex++;
-				}
-				str = xml.substring(charIndex-strIndex, charIndex);
-				charIndex += charIndexSteps[j++];
-				if (str.isEmpty()) f = stations[i].extrapolateSlp(); 
-				else f = Float.parseFloat(str);
-				stations[i].addSlp(f);
-				bytes.putFloat(f);
-				
-				strIndex = 0;
-				str = "";
-				while ((c = xml.charAt(charIndex)) != '<') {
-					strIndex ++;
-					charIndex++;
-				}
-				str = xml.substring(charIndex-strIndex, charIndex);
-				charIndex += charIndexSteps[j++];
-				if (str.isEmpty()) f = stations[i].getVisib(); 
-				else f = Float.parseFloat(str);
-				stations[i].setVisib(f);
-				bytes.putFloat(f);
-				
-				strIndex = 0;
-				str = "";
-				while ((c = xml.charAt(charIndex)) != '<') {
-					strIndex ++;
-					charIndex++;
-				}
-				str = xml.substring(charIndex-strIndex, charIndex);
-				charIndex += charIndexSteps[j++];
-				if (str.isEmpty()) f = stations[i].extrapolateWdsp();
-				else f = Float.parseFloat(str);
-				stations[i].addWdsp(f);
-				bytes.putFloat(f);
-				
-				strIndex = 0;
-				str = "";
-				while ((c = xml.charAt(charIndex)) != '<') {
-					strIndex ++;
-					charIndex++;
-				}
-				str = xml.substring(charIndex-strIndex, charIndex);
-				charIndex += charIndexSteps[j++];
-				if (str.isEmpty()) f = stations[i].getPrcp();
-				else f = Float.parseFloat(str);
-				stations[i].setPrcp(f);
-				bytes.putFloat(f);
-				
-				strIndex = 0;
-				str = "";
-				while ((c = xml.charAt(charIndex)) != '<') {
-					strIndex ++;
-					charIndex++;
-				}
-				str = xml.substring(charIndex-strIndex, charIndex);
-				charIndex += charIndexSteps[j++];
-				if (str.isEmpty()) f = stations[i].getSndp();
-				else f = Float.parseFloat(str);
-				stations[i].setSndp(f);
-				bytes.putFloat(f);
-				
-				strIndex = 0;
-				str = "";
-				while ((c = xml.charAt(charIndex)) != '<') {
-					strIndex ++;
-					charIndex++;
-				}
-				str = xml.substring(charIndex-strIndex, charIndex);
-				charIndex += charIndexSteps[j++];
-				if (str.isEmpty()) num = stations[i].getFrshtt();
-				else num = Integer.parseInt(str, 2);
-				stations[i].setFrshtt(num);
-				bytes.put((byte) (num));
-				
-				strIndex = 0;
-				str = "";
-				while ((c = xml.charAt(charIndex)) != '<') {
-					strIndex ++;
-					charIndex++;
-				}
-				str = xml.substring(charIndex-strIndex, charIndex);
-				charIndex += charIndexSteps[j++];
-				if (str.isEmpty()) f = stations[i].getCldc();
-				else f = Float.parseFloat(str);
-				stations[i].setCldc(f);
-				bytes.putFloat(f);
-				
-				strIndex = 0;
-				str = "";
-				while ((c = xml.charAt(charIndex)) != '<') {
-					strIndex ++;
-					charIndex++;
-				}
-				str = xml.substring(charIndex-strIndex, charIndex);
-				
-				charIndex += charIndexSteps[j++];
-				if (str.isEmpty()) num = stations[i].getWnddir();
-				else s = Short.parseShort(str);
-				stations[i].setWnddir(s);
-				bytes.putShort(s);
-				j = 0;
-				
-				stations[i].addRecord(bytes.array());
-				
+	private void parseXML() {
+		// Set charIndex on first value of XML file
+		charIndex = 55;
+		
+		// Parsing and correcting values from XML file
+		for (int i = 0; i < 10; i++) {
+			valueIndex = 0;
+			ByteBuffer bytes = ByteBuffer.allocate(43);
+			
+			// Temporary variables
+			String tmpString = new String();
+			int tmpInt = 0;
+			float tmpFloat = 0;
+			short tmpShort = 0;
+			
+			// STN
+			tmpString = readNext();
+			tmpInt = Integer.parseInt(tmpString);
+			stations[i].setStn(tmpInt);
+			
+			// DATE
+			tmpString = readNext();
+			stations[i].setDate(tmpString);
+			
+			// TIME (parsing date to int)
+			tmpString = readNext();
+			DateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+			try {
+				tmpInt = (int) sdf.parse(tmpString).getTime();
+			} catch (ParseException e) {
+				System.out.println(socket.getPort());
+				e.printStackTrace();
 			}
+			bytes.putInt(tmpInt);
+			
+			// TEMP (with correction if deviation is 20%)
+			tmpString = readNext();
+			tmpFloat = Float.parseFloat(tmpString);
+			if (stations[i].sizeOfTemp() > 0) {
+				float extrapolatedTemp = stations[i].extrapolateTemp();
+				if (Math.abs(tmpFloat) > Math.abs(extrapolatedTemp) * 1.2) {
+					tmpFloat = extrapolatedTemp ;
+				} else if (Math.abs(tmpFloat) < Math.abs(extrapolatedTemp) * 0.8) {
+					tmpFloat = extrapolatedTemp ;
+				}
+			}
+			stations[i].addTemp(tmpFloat);
+			bytes.putFloat(tmpFloat);
+			
+			// DEWP
+			tmpString = readNext();
+			if (tmpString.isEmpty()) tmpFloat = stations[i].extrapolateDewp(); 
+			else tmpFloat = Float.parseFloat(tmpString);
+			stations[i].addDewp(tmpFloat);
+			bytes.putFloat(tmpFloat);
+			
+			// STP
+			tmpString = readNext();
+			if (tmpString.isEmpty()) tmpFloat = stations[i].extrapolateStp(); 
+			else tmpFloat = Float.parseFloat(tmpString);
+			stations[i].addStp(tmpFloat);
+			bytes.putFloat(tmpFloat);
+			
+			// SLP
+			tmpString = readNext();
+			if (tmpString.isEmpty()) tmpFloat = stations[i].extrapolateSlp(); 
+			else tmpFloat = Float.parseFloat(tmpString);
+			stations[i].addSlp(tmpFloat);
+			bytes.putFloat(tmpFloat);
+			
+			// VISIB
+			tmpString = readNext();
+			if (tmpString.isEmpty()) tmpFloat = stations[i].getVisib(); 
+			else tmpFloat = Float.parseFloat(tmpString);
+			stations[i].setVisib(tmpFloat);
+			bytes.putFloat(tmpFloat);
+			
+			// WDSP
+			tmpString = readNext();
+			if (tmpString.isEmpty()) tmpFloat = stations[i].extrapolateWdsp();
+			else tmpFloat = Float.parseFloat(tmpString);
+			stations[i].addWdsp(tmpFloat);
+			bytes.putFloat(tmpFloat);
+			
+			// PRCP
+			tmpString = readNext();
+			if (tmpString.isEmpty()) tmpFloat = stations[i].getPrcp();
+			else tmpFloat = Float.parseFloat(tmpString);
+			stations[i].setPrcp(tmpFloat);
+			bytes.putFloat(tmpFloat);
+			
+			// SNDP
+			tmpString = readNext();
+			if (tmpString.isEmpty()) tmpFloat = stations[i].getSndp();
+			else tmpFloat = Float.parseFloat(tmpString);
+			stations[i].setSndp(tmpFloat);
+			bytes.putFloat(tmpFloat);
+			
+			// FRSHTT
+			tmpString = readNext();
+			if (tmpString.isEmpty()) tmpInt = stations[i].getFrshtt();
+			else tmpInt = Integer.parseInt(tmpString, 2);
+			stations[i].setFrshtt(tmpInt);
+			bytes.put((byte) (tmpInt));
+			
+			// CLDC
+			tmpString = readNext();
+			if (tmpString.isEmpty()) tmpFloat = stations[i].getCldc();
+			else tmpFloat = Float.parseFloat(tmpString);
+			stations[i].setCldc(tmpFloat);
+			bytes.putFloat(tmpFloat);
+			
+			// WNDDIR
+			tmpString = readNext();
+			if (tmpString.isEmpty()) tmpInt = stations[i].getWnddir();
+			else tmpShort = Short.parseShort(tmpString);
+			stations[i].setWnddir(tmpShort);
+			bytes.putShort(tmpShort);
+
+			// Add record to Station Object
+			stations[i].addRecord(bytes.array());
+			
 		}
 	}
 	
+	private String readNext() {
+		// Searching for end of new value in XML file
+		int offset = 0;
+		while (xml.charAt(charIndex) != '<') {
+			offset++;
+			charIndex++;
+		}
+		// Reading the new value and return it
+		String value = xml.substring(charIndex - offset, charIndex);
+		charIndex += charIndexSteps[valueIndex++];
+		return value;
+	}
 	
-	public void close() {
-		// Sluiten van de socket bij Exception
+	
+	private void close() {
+		// Close the socket 
 		try {
 	    	input.close();
 	        socket.close();

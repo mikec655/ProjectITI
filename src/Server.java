@@ -14,26 +14,27 @@ public abstract class Server
 
         Socket conn; // Client socket
 		try {
-			// Server socket die luistert naar nieuwe clients
+			// Server socket listening for new clients
 			server = new ServerSocket(PORT);
 			System.out.println("Server Started, Waiting for clients.");
 			
 			while (true) {
-				// Accepteren van nieuwe clients
+				// Accept new clients
 				if (clientCounter <= MAX_CLIENTS) {
 					conn = server.accept();		
-					// Client in Thread stoppen
+					// Make new client an start a new thread
 					Client client = new Client(conn);
 					Thread thread = new Thread(client);
 					thread.start();
+					// Increase the client count and prints it to the socket
 					clientCounter++;
 					System.out.println("New client accepted. client count: " + clientCounter);
 				} else {
+					// If max clients is reached now new clients are accepted  
 					System.out.println("Client not accepted. client count is already " + MAX_CLIENTS);
 				}
 			}
 		}
-
 		catch (java.io.IOException e) { 
 			System.out.println(e);
 		}        
