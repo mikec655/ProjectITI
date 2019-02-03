@@ -53,7 +53,7 @@ public class Client implements Runnable{
 	}
 			
 	private void receiveXML() {
-		StringBuilder xmlBuilder = new StringBuilder(1400);
+		StringBuilder xmlBuilder = new StringBuilder(4000);
     	
     	// Read from socket until the end of XML file
     	while(true) {

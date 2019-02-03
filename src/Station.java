@@ -11,11 +11,16 @@ public class Station {
 	private int stn;
 	private String date;
 	private Deque<Float> tempQueue = new ArrayDeque<Float>();
+	private float tempSum;
 	private Deque<Float> dewpQueue = new ArrayDeque<Float>();
+	private float dewpSum;
 	private Deque<Float> stpQueue = new ArrayDeque<Float>();
+	private float stpSum;
 	private Deque<Float> slpQueue = new ArrayDeque<Float>();
+	private float slpSum;
 	private float visib;
 	private Deque<Float> wdspQueue = new ArrayDeque<Float>();
+	private float wdspSum;
 	private float prcp;
 	private float sndp;
 	private int frshtt;
@@ -50,10 +55,11 @@ public class Station {
 	}
 
 	// Setters and Adders
-	private void addValue(float value, Deque<Float> queue) {
+	private void addValue(float value, float sum, Deque<Float> queue) {
 		queue.add(value);
+		sum += value;
 		if (queue.size() > 30) {
-			queue.poll();
+			sum -= queue.poll();;
 		}
 	}
 	
@@ -66,19 +72,19 @@ public class Station {
 	}
 	
 	public void addTemp(float temp) {
-		addValue(temp, tempQueue);
+		addValue(temp, tempSum, tempQueue);
 	}
 	
 	public void addDewp(float dewp) {
-		addValue(dewp, dewpQueue);
+		addValue(dewp, dewpSum, dewpQueue);
 	}
 	
 	public void addStp(float stp) {
-		addValue(stp, stpQueue);
+		addValue(stp, stpSum, stpQueue);
 	}
 	
 	public void addSlp(float slp) {
-		addValue(slp, slpQueue);
+		addValue(slp, slpSum, slpQueue);
 	}
 	
 	public void setVisib(float visib) {
@@ -86,7 +92,7 @@ public class Station {
 	}
 	
 	public void addWdsp(float wdsp) {
-		addValue(wdsp, wdspQueue);
+		addValue(wdsp, wdspSum, wdspQueue);
 	}
 	
 	public void setPrcp(float prcp) {
