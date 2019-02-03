@@ -42,9 +42,9 @@ public class Station {
 	// Write bytes to file
 	private void writeRecords() {
 		try {
-			File f = new File("Public/data/" + date);
+			File f = new File("data/" + date);
 			f.mkdirs();
-			f = new File("Public/data/" + date + "/" + stn + ".dat");
+			f = new File("data/" + date + "/" + stn + ".dat");
 			f.createNewFile(); 
 			FileOutputStream fos = new FileOutputStream(f, true);
 			fos.write(records);
@@ -116,13 +116,8 @@ public class Station {
 	}
 
 	// Getters and Extrapolation
-	private float extrapolate(Deque<Float> queue) {
-		float average = 0;
-		float sum = 0;
-		for(float y: queue){
-			sum += y; 
-		}
-		average = sum / queue.size();
+	private float extrapolate(Deque<Float> queue, float sum) {
+		float average = sum / queue.size();
 		return Math.round(average * 10) / 10;
 	}
 	
@@ -131,19 +126,19 @@ public class Station {
 	}
 
 	public float extrapolateTemp() {
-		return extrapolate(tempQueue);
+		return extrapolate(tempQueue, tempSum);
 	}
 	
 	public float extrapolateDewp() {
-		return extrapolate(dewpQueue);
+		return extrapolate(dewpQueue, dewpSum);
 	}
 	
 	public float extrapolateStp() {
-		return extrapolate(stpQueue);
+		return extrapolate(stpQueue, stpSum);
 	}
 	
 	public float extrapolateSlp() {
-		return extrapolate(slpQueue);
+		return extrapolate(slpQueue, slpSum);
 	}
 	
 	public float getVisib() {
@@ -151,7 +146,7 @@ public class Station {
 	}
 	
 	public float extrapolateWdsp() {
-		return extrapolate(wdspQueue);
+		return extrapolate(wdspQueue, wdspSum);
 	}
 
 	public float getPrcp() {
