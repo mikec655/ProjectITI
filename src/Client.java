@@ -71,7 +71,6 @@ public class Client implements Runnable{
     	}
     	
     	xml = xmlBuilder.toString();
-    	System.out.println(xml);
 	}
 	
 	private void parseXML() {
