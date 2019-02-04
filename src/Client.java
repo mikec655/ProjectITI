@@ -48,7 +48,7 @@ public class Client implements Runnable{
 	public void run() {
 		while (alive) {
 			receiveXML();
-			parseXML();
+			//parseXML();
 		}
 	}
 			
@@ -69,8 +69,9 @@ public class Client implements Runnable{
     			alive = false;
     		}
     	}
-
+    	
     	xml = xmlBuilder.toString();
+    	System.out.println(xml);
 	}
 	
 	private void parseXML() {
