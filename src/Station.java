@@ -11,16 +11,11 @@ public class Station {
 	private int stn;
 	private String date;
 	private Deque<Float> tempQueue = new ArrayDeque<Float>();
-	private float tempSum;
 	private Deque<Float> dewpQueue = new ArrayDeque<Float>();
-	private float dewpSum;
 	private Deque<Float> stpQueue = new ArrayDeque<Float>();
-	private float stpSum;
 	private Deque<Float> slpQueue = new ArrayDeque<Float>();
-	private float slpSum;
 	private float visib;
 	private Deque<Float> wdspQueue = new ArrayDeque<Float>();
-	private float wdspSum;
 	private float prcp;
 	private float sndp;
 	private int frshtt;
@@ -55,11 +50,10 @@ public class Station {
 	}
 
 	// Setters and Adders
-	private void addValue(float value, float sum, Deque<Float> queue) {
+	private void addValue(float value, Deque<Float> queue) {
 		queue.add(value);
-		sum += value;
 		if (queue.size() > 30) {
-			sum -= queue.poll();;
+			queue.poll();
 		}
 	}
 	
@@ -72,19 +66,19 @@ public class Station {
 	}
 	
 	public void addTemp(float temp) {
-		addValue(temp, tempSum, tempQueue);
+		addValue(temp,tempQueue);
 	}
 	
 	public void addDewp(float dewp) {
-		addValue(dewp, dewpSum, dewpQueue);
+		addValue(dewp, dewpQueue);
 	}
 	
 	public void addStp(float stp) {
-		addValue(stp, stpSum, stpQueue);
+		addValue(stp, stpQueue);
 	}
 	
 	public void addSlp(float slp) {
-		addValue(slp, slpSum, slpQueue);
+		addValue(slp, slpQueue);
 	}
 	
 	public void setVisib(float visib) {
@@ -92,7 +86,7 @@ public class Station {
 	}
 	
 	public void addWdsp(float wdsp) {
-		addValue(wdsp, wdspSum, wdspQueue);
+		addValue(wdsp, wdspQueue);
 	}
 	
 	public void setPrcp(float prcp) {
@@ -116,7 +110,11 @@ public class Station {
 	}
 
 	// Getters and Extrapolation
-	private float extrapolate(Deque<Float> queue, float sum) {
+	private float extrapolate(Deque<Float> queue) {
+		float sum = 0;
+		for(float value: queue) {
+			sum += value;
+		}
 		float average = sum / queue.size();
 		return Math.round(average * 10) / 10;
 	}
@@ -126,19 +124,19 @@ public class Station {
 	}
 
 	public float extrapolateTemp() {
-		return extrapolate(tempQueue, tempSum);
+		return extrapolate(tempQueue);
 	}
 	
 	public float extrapolateDewp() {
-		return extrapolate(dewpQueue, dewpSum);
+		return extrapolate(dewpQueue);
 	}
 	
 	public float extrapolateStp() {
-		return extrapolate(stpQueue, stpSum);
+		return extrapolate(stpQueue);
 	}
 	
 	public float extrapolateSlp() {
-		return extrapolate(slpQueue, slpSum);
+		return extrapolate(slpQueue);
 	}
 	
 	public float getVisib() {
@@ -146,7 +144,7 @@ public class Station {
 	}
 	
 	public float extrapolateWdsp() {
-		return extrapolate(wdspQueue, wdspSum);
+		return extrapolate(wdspQueue);
 	}
 
 	public float getPrcp() {

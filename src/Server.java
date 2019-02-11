@@ -4,13 +4,17 @@ import java.net.Socket;
   
 public abstract class Server 
 { 
-    private static final int PORT = 11000;
+	public static WriteBuffer writeBuffer;
+    private static final int PORT = 7789;
     private static final int MAX_CLIENTS = 800;
 	private static int clientCounter = 0;
 	private static ServerSocket server;
   
     public static void main(String args[]) 
     { 
+    	writeBuffer = new WriteBuffer();
+    	Thread writeThread = new Thread(writeBuffer);
+    	writeThread.start();
 
         Socket conn; // Client socket
 		try {
@@ -23,7 +27,7 @@ public abstract class Server
 				if (clientCounter <= MAX_CLIENTS) {
 					conn = server.accept();		
 					// Make new client an start a new thread
-					Client client = new Client(conn);
+					Client client = new Client(clientCounter, conn);
 					Thread thread = new Thread(client);
 					thread.start();
 					// Increase the client count and prints it to the socket
