@@ -8,6 +8,8 @@ import java.nio.ByteBuffer;
 public class Writer implements Runnable {
 	
 	private Socket socket;
+	private static final String FILE_PATH = "/var/www/html/herocycles/public/data/";
+	//private static final String FILE_PATH = "C:/xampp/htdocs/ProjectITIWebApp/public/data/";
 	
 	public Writer(Socket socket) {
 		this.socket = socket;
@@ -26,9 +28,9 @@ public class Writer implements Runnable {
 			int stn = ByteBuffer.wrap(data, 10, 14).getInt();
 			
 			// Creating file
-			File f = new File("/var/www/html/herocycles/public/data/" + date); 
+			File f = new File(FILE_PATH + date); 
 			f.mkdirs();
-			f = new File("/var/www/html/herocycles/public/data/" + date + "/" + stn + ".dat");
+			f = new File(FILE_PATH + date + "/" + stn + ".dat");
 			f.createNewFile();
 			
 			// Writing data
