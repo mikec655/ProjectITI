@@ -1,20 +1,25 @@
 
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
   
 public abstract class Server 
 { 
-	public static WriteBuffer writeBuffer;
+	public static DataSender dataSender;
     private static final int PORT = 7789;
     private static final int MAX_CLIENTS = 800;
 	private static int clientCounter = 0;
 	private static ServerSocket server;
+	private static ExecutorService executor;
   
     public static void main(String args[]) 
     { 
-    	writeBuffer = new WriteBuffer();
-    	Thread writeThread = new Thread(writeBuffer);
-    	writeThread.start();
+    	executor = Executors.newFixedThreadPool(MAX_CLIENTS);
+    	
+    	dataSender = new DataSender();
+    	Thread sendThread = new Thread(dataSender);
+    	sendThread.start();
 
         Socket conn; // Client socket
 		try {
@@ -28,8 +33,7 @@ public abstract class Server
 					conn = server.accept();		
 					// Make new client an start a new thread
 					Client client = new Client(clientCounter, conn);
-					Thread thread = new Thread(client);
-					thread.start();
+					executor.execute(client);
 					// Increase the client count and prints it to the socket
 					clientCounter++;
 					System.out.println("New client accepted. client count: " + clientCounter);

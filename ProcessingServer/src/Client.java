@@ -10,7 +10,6 @@ import java.text.SimpleDateFormat;
 
 public class Client implements Runnable{
 	
-	private int id;
 	private Socket socket;
 	private BufferedReader input;
 	private Station[] stations = new Station[10];
@@ -23,7 +22,6 @@ public class Client implements Runnable{
 	};
 
 	public Client(int id, Socket socket) {
-		this.id = id;
 		this.socket = socket;
 		for (int i = 0; i < 10; i++) {
 			stations[i] = new Station();
@@ -84,8 +82,6 @@ public class Client implements Runnable{
 			valueIndex = 0;
 			ByteBuffer bytes = ByteBuffer.allocate(43);
 			
-			int time;
-			
 			// Temporary variables
 			String tmpString = new String();
 			int tmpInt = 0;
@@ -95,11 +91,11 @@ public class Client implements Runnable{
 			// STN
 			tmpString = readNext();
 			tmpInt = Integer.parseInt(tmpString);
-			bytes.putInt(tmpInt);
+			stations[i].setStn(tmpInt);
 			
 			// DATE
 			tmpString = readNext();
-			Server.writeBuffer.setDate(tmpString);
+			stations[i].setDate(tmpString);
 			
 			// TIME (parsing date to int)
 			tmpString = readNext();
@@ -110,7 +106,7 @@ public class Client implements Runnable{
 				System.out.println(socket.getPort());
 				e.printStackTrace();
 			}
-			time = tmpInt;
+			bytes.putInt(tmpInt);
 			
 			// TEMP (with correction if deviation is 20%)
 			tmpString = readNext();
@@ -197,7 +193,7 @@ public class Client implements Runnable{
 			bytes.putShort(tmpShort);
 
 			// Add record to Station Object
-			Server.writeBuffer.addRecord(time, bytes.array());
+			stations[i].addRecord(bytes.array());
 			
 		}
 	}

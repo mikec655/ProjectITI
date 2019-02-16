@@ -1,6 +1,4 @@
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
@@ -30,22 +28,11 @@ public class Station {
 		recordIndex++;
 		if (recordIndex == 60){
 			recordIndex = 0;
-			writeRecords();
-		}
-	}
-	
-	// Write bytes to file
-	private void writeRecords() {
-		try {
-			File f = new File("data/" + date);
-			f.mkdirs();
-			f = new File("data/" + date + "/" + stn + ".dat");
-			f.createNewFile(); 
-			FileOutputStream fos = new FileOutputStream(f, true);
-			fos.write(records);
-			fos.close();
-		} catch (IOException e) {
-			System.out.println(e);
+			ByteBuffer data = ByteBuffer.allocate(14 + 43 * 60);
+			data.put(date.getBytes());
+			data.putInt(stn);
+			data.put(records);
+			Server.dataSender.addRecord(data.array());
 		}
 	}
 
@@ -117,6 +104,10 @@ public class Station {
 		}
 		float average = sum / queue.size();
 		return Math.round(average * 10) / 10;
+	}
+	
+	public int getStn() {
+		return stn;
 	}
 	
 	public String getDate() {
